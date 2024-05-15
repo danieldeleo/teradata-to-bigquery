@@ -1,0 +1,39 @@
+/* Run the docker command below to debug locally
+ * 
+ * sudo docker run \
+ *   --entrypoint tbuild \
+ *   -v ./export.tpt:/tmp/export.tpt \
+ *   -v ./credentials.json:/root/.gcs/credentials \
+ *   -e "accept_license=Y" \
+ *   teradata/tpt:latest \
+ *   -f /tmp/export.tpt \
+ *   -u "jobvar_tdpid='10.128.0.26',jobvar_username='dbc',jobvar_password='pass'"
+ *
+ */
+USING CHARACTER SET 'UTF8' 
+DEFINE JOB EXPORT_FROM_TERADATA 
+DESCRIPTION 'Export Teradata to GCS' 
+( 
+  STEP EXPORT_THE_DATA (
+    APPLY TO OPERATOR ($FILE_WRITER()
+      ATTR
+      (
+        AccessModuleName = 'libgcsaxsmod.so',
+        AccessModuleInitStr = 'Bucket=dannybq 
+                               Prefix="gcs_location/to/file/"
+                               Object=gcs_file_name_exp.csv',
+        Format = 'Delimited',
+        TextDelimiterHex = '10'
+      )
+    )
+    SELECT * FROM OPERATOR ($EXPORT()
+      ATTR
+      (
+        TdpId = @jobvar_tdpid,
+        UserName = @jobvar_username,
+        UserPassword = @jobvar_password,
+        SelectStmt = @jobvar_selectstmt
+      )
+    );
+  );
+);
