@@ -3,16 +3,38 @@ steps:
   # Run TPT script
   ############################################################
 - name: teradata/tpt:latest
-  entrypoint: bash
-  args:
-    - run_tpt.sh
+  script: |
+    #!/bin/bash
+    set -e
+    tbuild -f export.tpt -u "
+      jobvar_tdpid='10.128.0.26',
+      jobvar_username='dbc',
+      jobvar_password='${TERADATA_PASSWORD}',
+      jobvar_selectstmt='${SELECT_STATEMENT}',
+      jobvar_accessmoduleinitstr='
+        Bucket=${GCS_BUCKET}
+        Prefix=${GCS_PREFIX}
+        Object=data.csv
+        MaxObjectSize=100M 
+        ConnectionCount=20
+      '
+    "
   env:
     - accept_license=Y
-    - "SELECT_STATEMENT=SELECT * FROM tpch.orders;"
+    - SELECT_STATEMENT=${_SELECT_STATEMENT}
+    - GCS_BUCKET=${_GCS_BUCKET}
+    - GCS_PREFIX=${_GCS_PREFIX}
+
   secretEnv: 
     - GCS_ACCESS_KEY_ID
     - GCS_SECRET_ACCESS_KEY
     - TERADATA_PASSWORD
+
+substitutions:
+  _SELECT_STATEMENT: "SELECT * FROM tpch.orders;"
+  _GCS_BUCKET: "dannybq"
+  _GCS_PREFIX: "orders/"
+
 options:
   pool:
     name: projects/${PROJECT_ID}/locations/us-central1/workerPools/tpt 
