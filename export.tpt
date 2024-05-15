@@ -15,18 +15,20 @@ DEFINE JOB EXPORT_FROM_TERADATA
 DESCRIPTION 'Export Teradata to GCS' 
 ( 
   STEP EXPORT_THE_DATA (
-    APPLY TO OPERATOR ($FILE_WRITER()
+    APPLY TO OPERATOR ($FILE_WRITER()[4]
       ATTR
       (
         AccessModuleName = 'libgcsaxsmod.so',
         AccessModuleInitStr = 'Bucket=dannybq 
                                Prefix="gcs_location/to/file/"
-                               Object=gcs_file_name_exp.csv',
+                               Object=gcs_file_name_exp.csv
+                               MaxObjectSize=100M
+                               ConnectionCount=20',
         Format = 'Delimited',
         TextDelimiterHex = '10'
       )
     )
-    SELECT * FROM OPERATOR ($EXPORT()
+    SELECT * FROM OPERATOR ($EXPORT()[4]
       ATTR
       (
         TdpId = @jobvar_tdpid,
