@@ -7,7 +7,7 @@ steps:
     #!/bin/bash
     set -e
     tbuild -f export.tpt -u "
-      jobvar_tdpid='10.128.0.26',
+      jobvar_tdpid='${TERADATA_HOSTNAME}',
       jobvar_username='dbc',
       jobvar_password='${TERADATA_PASSWORD}',
       jobvar_selectstmt='${SELECT_STATEMENT}',
@@ -21,6 +21,7 @@ steps:
     "
   env:
     - accept_license=Y
+    - TERADATA_HOSTNAME=${_TERADATA_HOSTNAME}
     - SELECT_STATEMENT=${_SELECT_STATEMENT}
     - GCS_BUCKET=${_GCS_BUCKET}
     - GCS_PREFIX=${_GCS_PREFIX}
@@ -31,6 +32,7 @@ steps:
     - TERADATA_PASSWORD
 
 substitutions:
+  _TERADATA_HOSTNAME: "10.128.0.26"
   _SELECT_STATEMENT: "SELECT * FROM tpch.orders;"
   _GCS_BUCKET: "dannybq"
   _GCS_PREFIX: "orders/"
