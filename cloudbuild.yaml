@@ -5,7 +5,7 @@ steps:
 - name: teradata/tpt:latest
   script: |
     #!/bin/bash
-    set -e
+    set -eo pipefail  # Enable exit-on-error mode
     tbuild -f export.tpt -u "
       jobvar_tdpid='${TERADATA_HOSTNAME}',
       jobvar_username='dbc',

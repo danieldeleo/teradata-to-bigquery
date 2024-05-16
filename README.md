@@ -6,7 +6,8 @@
 
 1. Clone this repo and run the following:
     ```bash
-    gcloud builds submit --region=us-central1 . \
+    gcloud builds submit \
+        --region=us-central1 . \
         --substitutions=_TERADATA_HOSTNAME="YOUR_TD_HOSTNAME",_SELECT_STATEMENT="SELECT * FROM tpch.orders;",_GCS_BUCKET="YOUR_BUCKET",_GCS_PREFIX="orders/"
     ```
 
