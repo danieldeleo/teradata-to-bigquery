@@ -22,3 +22,13 @@ sudo docker run \
   -f /tmp/export.tpt \
   -u "jobvar_tdpid='10.128.0.26',jobvar_username='dbc',jobvar_password='pass'"
 ```
+
+## Teradata TPT Docker Image
+
+Teradata's [TPT docker image](https://hub.docker.com/r/teradata/tpt) comes packaged with the following:
+* Teradata Parallel Transporter Base
+* Teradata CLIv2
+* Shared ICU Libraries for Teradata
+* Teradata Wallet
+* Teradata BTEQ
+* Teradata Access Modules
