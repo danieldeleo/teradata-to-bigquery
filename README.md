@@ -10,10 +10,10 @@
         --substitutions=_TERADATA_HOSTNAME="YOUR_TD_HOSTNAME",_SELECT_STATEMENT="SELECT * FROM tpch.orders;",_GCS_BUCKET="YOUR_BUCKET",_GCS_PREFIX="orders/"
     ```
 
-## Running TPT Docker Image Locally
+# How to run TPT Docker Image Locally
 
 ```bash
-sudo docker run \
+docker run \
   --entrypoint tbuild \
   -v ./export.tpt:/tmp/export.tpt \
   -v ./credentials.json:/root/.gcs/credentials \
@@ -23,7 +23,7 @@ sudo docker run \
   -u "jobvar_tdpid='10.128.0.26',jobvar_username='dbc',jobvar_password='pass'"
 ```
 
-## Teradata TPT Docker Image
+# What's inside the TPT Docker Image?
 
 Teradata's [TPT docker image](https://hub.docker.com/r/teradata/tpt) comes packaged with the following:
 * Teradata Parallel Transporter Base
