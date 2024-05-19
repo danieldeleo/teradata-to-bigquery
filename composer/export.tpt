@@ -1,0 +1,28 @@
+USING CHARACTER SET 'UTF8' 
+DEFINE JOB EXPORT_FROM_TERADATA_TO_GCS 
+DESCRIPTION 'Export from Teradata to GCS' 
+( 
+  STEP EXPORT_THE_DATA (
+    APPLY TO OPERATOR ($FILE_WRITER()[2]
+      ATTR
+      (
+        AccessModuleName = 'libgcsaxsmod.so',
+        AccessModuleInitStr = @jobvar_accessmoduleinitstr,
+        Format = 'Delimited',
+        TextDelimiterHex = '10'
+      )
+    )
+    SELECT * FROM OPERATOR ($EXPORT()[2]
+      ATTR
+      (
+        TdpId = @jobvar_tdpid,
+        UserName = @jobvar_username,
+        UserPassword = @jobvar_password,
+        SelectStmt = @jobvar_selectstmt,
+        DateForm='ansiDate'
+        /* MaxSessions=6 */
+        /* MinSessions=3 */
+      )
+    );
+  );
+);
