@@ -3,12 +3,11 @@ import datetime
 
 import airflow
 from airflow import models
-from kubernetes.client import models as k8s
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
     KubernetesPodOperator,
 )
 from airflow.providers.cncf.kubernetes.secret import Secret
-
+from kubernetes.client import models as k8s
 
 TERADATA_HOSTNAME = "10.128.0.26"
 TERADATA_USERNAME = "dbc"
@@ -18,6 +17,8 @@ GCS_PREFIX = "orders/"
 GCS_OBJECT_NAME = "data.csv"
 GCS_MAX_OBJECT_SIZE = "400M"
 GCS_CONNECTION_COUNT = "10"
+NUM_READ_INSTANCES = 1
+NUM_WRITE_INSTANCES = 1
 
 TERADATA_PASSWORD = Secret(
     deploy_type="env",
@@ -48,12 +49,12 @@ def read_export_tpt():
 
 with models.DAG(
     dag_id="tpt",
-    default_args={"retries": 0},
+    default_args={"retries": 5},
     schedule_interval=datetime.timedelta(days=1),
     start_date=airflow.utils.dates.days_ago(1),
-    max_active_tasks=5,
+    max_active_tasks=2,
 ) as dag:
-    for x in range(1):
+    for x in range(10):
         task_id = f"tpt{x}"
         tpt = KubernetesPodOperator(
             task_id=task_id,
@@ -68,6 +69,8 @@ with models.DAG(
                   jobvar_tdpid='{TERADATA_HOSTNAME}', \
                   jobvar_username='{TERADATA_USERNAME}', \
                   jobvar_password='${{TERADATA_PASSWORD}}', \
+                  jobvar_num_read_instances={NUM_READ_INSTANCES}, \
+                  jobvar_num_write_instances={NUM_WRITE_INSTANCES}, \
                   jobvar_selectstmt='{SELECT_STATEMENT}', \
                   jobvar_accessmoduleinitstr='\
                   Bucket={GCS_BUCKET} \

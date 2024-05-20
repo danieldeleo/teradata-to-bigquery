@@ -3,7 +3,7 @@ DEFINE JOB EXPORT_FROM_TERADATA_TO_GCS
 DESCRIPTION 'Export from Teradata to GCS' 
 ( 
   STEP EXPORT_THE_DATA (
-    APPLY TO OPERATOR ($FILE_WRITER()[2]
+    APPLY TO OPERATOR ($FILE_WRITER()[@jobvar_num_write_instances]
       ATTR
       (
         AccessModuleName = 'libgcsaxsmod.so',
@@ -12,7 +12,7 @@ DESCRIPTION 'Export from Teradata to GCS'
         TextDelimiterHex = '10'
       )
     )
-    SELECT * FROM OPERATOR ($EXPORT()[2]
+    SELECT * FROM OPERATOR ($EXPORT()[@jobvar_num_read_instances]
       ATTR
       (
         TdpId = @jobvar_tdpid,
