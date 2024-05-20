@@ -1,4 +1,4 @@
-"""An example for running multi-tenant workloads"""
+"""An example for using Teradata Parallel Transporter (TPT) with Composer."""
 import datetime
 
 import airflow
