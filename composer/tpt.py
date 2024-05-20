@@ -52,7 +52,7 @@ with models.DAG(
     default_args={"retries": 5},
     schedule_interval=datetime.timedelta(days=1),
     start_date=airflow.utils.dates.days_ago(1),
-    max_active_tasks=5,
+    max_active_tasks=10,
 ) as dag:
     for x in range(10):
         task_id = f"tpt{x}"
@@ -63,6 +63,7 @@ with models.DAG(
             arguments=[
                 "-c",
                 rf"""
+                set -e && \
                 echo "{read_export_tpt()}" > export.tpt && \
                 more export.tpt && \
                 tbuild -f export.tpt -u "\
@@ -86,6 +87,9 @@ with models.DAG(
                     "memory": "512Mi",
                 }
             ),
+            is_delete_operator_pod=True,
+            reattach_on_restart=False,
+            startup_timeout_seconds=3600,
             namespace="composer-user-workloads",
             secrets=[TERADATA_PASSWORD, GCS_ACCESS_KEY, GCS_SECRET_ACCESS_KEY],
             image="teradata/tpt:latest",
