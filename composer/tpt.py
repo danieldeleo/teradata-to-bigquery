@@ -52,7 +52,7 @@ with models.DAG(
     default_args={"retries": 5},
     schedule_interval=datetime.timedelta(days=1),
     start_date=airflow.utils.dates.days_ago(1),
-    max_active_tasks=2,
+    max_active_tasks=5,
 ) as dag:
     for x in range(10):
         task_id = f"tpt{x}"
