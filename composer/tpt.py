@@ -13,7 +13,7 @@ TERADATA_HOSTNAME = "10.128.0.26"
 TERADATA_USERNAME = "dbc"
 SELECT_STATEMENT = "SELECT * FROM tpch.orders;"
 GCS_BUCKET = "dannybq"
-GCS_PREFIX = "orders/"
+GCS_PREFIX = "orders"
 GCS_OBJECT_NAME = "data.csv"
 GCS_MAX_OBJECT_SIZE = "200M"
 GCS_CONNECTION_COUNT = "10"
@@ -75,7 +75,7 @@ with models.DAG(
                   jobvar_selectstmt='{SELECT_STATEMENT}', \
                   jobvar_accessmoduleinitstr='\
                   Bucket={GCS_BUCKET} \
-                  Prefix={GCS_PREFIX}{x}/attempt_${{AIRFLOW_RETRY_NUMBER}}/ \
+                  Prefix={GCS_PREFIX}/task_id={task_id}/try_number=${{AIRFLOW_RETRY_NUMBER}}/ \
                   Object={GCS_OBJECT_NAME} \
                   MaxObjectSize={GCS_MAX_OBJECT_SIZE} \
                   ConnectionCount={GCS_CONNECTION_COUNT}'"
