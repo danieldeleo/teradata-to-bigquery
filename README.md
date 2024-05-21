@@ -15,7 +15,9 @@
       --from-literal=GCS_ACCESS_KEY_ID=srvcacct@YOUR_PROJECT_ID.iam.gserviceaccount.com \
       --from-literal=GCS_SECRET_ACCESS_KEY='-----BEGIN PRIVATE KEY-----\n ... \n-----END PRIVATE KEY-----\n'
     ```
-1. Copy the [tpt.py](composer/tpt.py) DAG and the [export.tpt](composer/export.tpt) file into the Composer DAGs folder
+1. Copy [tpt.py](composer/tpt.py) into the Composer dags folder
+1. Copy [export.tpt](composer/export.tpt) into the Composer data folder
+
 # How to run TPT in Cloud Build
 
 1. Create a private worker pool in Cloud Build named "tpt" in the us-central1 region which has network connectivity to your Teradata instance.
