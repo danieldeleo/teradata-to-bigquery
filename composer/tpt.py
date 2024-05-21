@@ -75,7 +75,7 @@ with models.DAG(
                   jobvar_selectstmt='{SELECT_STATEMENT}', \
                   jobvar_accessmoduleinitstr='\
                   Bucket={GCS_BUCKET} \
-                  Prefix={GCS_PREFIX}{x}/${{AIRFLOW_RETRY_NUMBER}}/ \
+                  Prefix={GCS_PREFIX}{x}/attempt_${{AIRFLOW_RETRY_NUMBER}}/ \
                   Object={GCS_OBJECT_NAME} \
                   MaxObjectSize={GCS_MAX_OBJECT_SIZE} \
                   ConnectionCount={GCS_CONNECTION_COUNT}'"
