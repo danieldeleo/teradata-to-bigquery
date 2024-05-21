@@ -15,7 +15,7 @@ SELECT_STATEMENT = "SELECT * FROM tpch.orders;"
 GCS_BUCKET = "dannybq"
 GCS_PREFIX = "orders/"
 GCS_OBJECT_NAME = "data.csv"
-GCS_MAX_OBJECT_SIZE = "400M"
+GCS_MAX_OBJECT_SIZE = "200M"
 GCS_CONNECTION_COUNT = "10"
 NUM_READ_INSTANCES = 1
 NUM_WRITE_INSTANCES = 1
@@ -43,18 +43,18 @@ GCS_SECRET_ACCESS_KEY = Secret(
 
 
 def read_export_tpt():
-    with open("/home/airflow/gcs/dags/export.tpt", "r") as f:
+    with open("/home/airflow/gcs/data/export.tpt", "r") as f:
         return f.read().replace("$", r"\$")
 
 
 with models.DAG(
     dag_id="tpt",
-    default_args={"retries": 5},
-    schedule_interval=datetime.timedelta(days=1),
+    default_args={"retries": 360, "retry_delay": datetime.timedelta(seconds=10)},
+    schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
-    max_active_tasks=10,
+    max_active_tasks=50,
 ) as dag:
-    for x in range(10):
+    for x in range(100):
         task_id = f"tpt{x}"
         tpt = KubernetesPodOperator(
             task_id=task_id,
@@ -82,14 +82,16 @@ with models.DAG(
                 """,
             ],
             container_resources=k8s.V1ResourceRequirements(
-                limits={
+                requests={
                     "cpu": "100m",
-                    "memory": "512Mi",
-                }
+                    "memory": "64Mi",
+                },
+                limits={
+                    "cpu": "1000m",
+                    "memory": "128Mi",
+                },
             ),
-            is_delete_operator_pod=True,
-            reattach_on_restart=False,
-            startup_timeout_seconds=3600,
+            log_events_on_failure=True,
             namespace="composer-user-workloads",
             secrets=[TERADATA_PASSWORD, GCS_ACCESS_KEY, GCS_SECRET_ACCESS_KEY],
             image="teradata/tpt:latest",
