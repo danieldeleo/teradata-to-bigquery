@@ -52,9 +52,9 @@ with models.DAG(
     default_args={"retries": 360, "retry_delay": datetime.timedelta(seconds=10)},
     schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
-    max_active_tasks=50,
+    max_active_tasks=2,
 ) as dag:
-    for x in range(100):
+    for x in range(10):
         task_id = f"tpt{x}"
         tpt = KubernetesPodOperator(
             task_id=task_id,
@@ -75,12 +75,13 @@ with models.DAG(
                   jobvar_selectstmt='{SELECT_STATEMENT}', \
                   jobvar_accessmoduleinitstr='\
                   Bucket={GCS_BUCKET} \
-                  Prefix={GCS_PREFIX}{x}/ \
+                  Prefix={GCS_PREFIX}{x}/${{AIRFLOW_RETRY_NUMBER}}/ \
                   Object={GCS_OBJECT_NAME} \
                   MaxObjectSize={GCS_MAX_OBJECT_SIZE} \
                   ConnectionCount={GCS_CONNECTION_COUNT}'"
                 """,
             ],
+            env_vars={"AIRFLOW_RETRY_NUMBER": "{{ task_instance.try_number }}"},
             container_resources=k8s.V1ResourceRequirements(
                 requests={
                     "cpu": "100m",
