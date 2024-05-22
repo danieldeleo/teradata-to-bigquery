@@ -49,10 +49,6 @@ def read_export_tpt():
 
 with models.DAG(
     dag_id="tpt",
-    default_args={
-        "retries": 30,
-        "retry_delay": datetime.timedelta(seconds=10),
-    },
     schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
     max_active_tasks=2,
