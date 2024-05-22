@@ -50,14 +50,7 @@ def read_export_tpt():
 with models.DAG(
     dag_id="tpt",
     default_args={
-        # Only set aggressive retries and retry_delay for this
-        # specific DAG because KubernetesPodOperator commonly
-        # disconnects from the Composer GKE cluster and this
-        # causes the task to fail and be retried. The pod executing
-        # the container will still be running and the retried Airflow
-        # task will simply connect to the Pod and continue waiting for
-        # the task to complete.
-        "retries": 100,
+        "retries": 30,
         "retry_delay": datetime.timedelta(seconds=10),
     },
     schedule_interval=None,
