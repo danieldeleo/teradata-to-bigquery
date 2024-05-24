@@ -52,8 +52,12 @@ with models.DAG(
     schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
     max_active_tasks=2,
+    default_args={
+        "retries": 10,
+        "retry_delay": datetime.timedelta(seconds=10),
+    },
 ) as dag:
-    for x in range(10):
+    for x in range(1):
         task_id = f"tpt{x}"
         tpt = KubernetesPodOperator(
             task_id=task_id,
@@ -68,13 +72,13 @@ with models.DAG(
                 tbuild -f export.tpt -u "\
                   jobvar_tdpid='{TERADATA_HOSTNAME}', \
                   jobvar_username='{TERADATA_USERNAME}', \
-                  jobvar_password='${{TERADATA_PASSWORD}}', \
+                  jobvar_password='$TERADATA_PASSWORD', \
                   jobvar_num_read_instances={NUM_READ_INSTANCES}, \
                   jobvar_num_write_instances={NUM_WRITE_INSTANCES}, \
                   jobvar_selectstmt='{SELECT_STATEMENT}', \
                   jobvar_accessmoduleinitstr='\
                   Bucket={GCS_BUCKET} \
-                  Prefix={GCS_PREFIX}/task_id={task_id}/try_number=${{AIRFLOW_RETRY_NUMBER}}/ \
+                  Prefix={GCS_PREFIX}/task_id={task_id}/try_number=$AIRFLOW_RETRY_NUMBER/ \
                   Object={GCS_OBJECT_NAME} \
                   MaxObjectSize={GCS_MAX_OBJECT_SIZE} \
                   ConnectionCount={GCS_CONNECTION_COUNT}'"
