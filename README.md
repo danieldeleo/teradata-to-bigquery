@@ -34,17 +34,33 @@
 # How to run TPT Docker Image Locally
 
 ```bash
-docker run \
+# Run interactive bash shell within the TPT Docker Image
+sudo docker run -it --entrypoint bash -e "accept_license=Y" teradata/tpt:latest
+```
+
+```bash
+# Run tbuild command within the TPT Docker Image
+sudo docker run \
   --entrypoint tbuild \
   -v ./export.tpt:/tmp/export.tpt \
   -v ./credentials.json:/root/.gcs/credentials \
   -e "accept_license=Y" \
   teradata/tpt:latest \
   -f /tmp/export.tpt \
-  -u "jobvar_tdpid='10.128.0.26',jobvar_username='dbc',jobvar_password='pass'"
+  -u "TD_HOSTNAME='10.128.0.26',TD_USERNAME='dbc',TD_PASSWORD='pass'"
+```
 
-
-  sudo docker run --entrypoint bash -v ./export.tpt:/tmp/export.tpt -v ./credentials.json:/root/.gcs/credentials -e "accept_license=Y,PASS=dbc"  teradata/tpt:latest -cx "tbuild -f /tmp/export.tpt -u \"jobvar_tdpid='10.128.0.26',jobvar_username='dbc',jobvar_password='${PASS}'\""
+```bash
+# Run tbuild command within the TPT Docker Image using bash
+sudo docker run \
+  --entrypoint bash \
+  -v ./export.tpt:/tmp/export.tpt \
+  -v ./credentials.json:/root/.gcs/credentials \
+  -e "accept_license=Y,PASS=pass"  \
+  teradata/tpt:latest \
+  -cx "tbuild \
+  -f /tmp/export.tpt \
+  -u \"TD_HOSTNAME='10.128.0.26',TD_USERNAME='dbc',TD_PASSWORD='${PASS}'\""
 ```
 
 # What's inside the TPT Docker Image?
@@ -56,3 +72,19 @@ Teradata's [TPT docker image](https://hub.docker.com/r/teradata/tpt) comes packa
 * Teradata Wallet
 * Teradata BTEQ
 * Teradata Access Modules
+
+# Tuning TPT Parameters
+
+## Operator instances:
+ * The number of sessions specified by the value of the operator MaxSessions attribute are balanced across the number of operator instances. 
+ * If the number of instances is not specified, the default is 1 instance per operator.
+ * Start by specifying only one or two instances for any given operator.
+Teradata PT will start as many instances as specified, but it uses only as many as needed.
+ * Don't create more instances than needed--instances consume system resources.
+ * Read the Teradata PT log file, which displays statistics showing how much data was processed by each instance. Reduce the number of instances if you see under utilized instances of any operators. If all instances are used add more and see if the job runs better.
+ * If the number of instances exceeds the number of available sessions, the job aborts. Therefore, when specifying multiple instances make sure the MaxSessions attribute is set to a high enough value that there is at least one session per instance.
+## MaxSessions:
+ * If no value is set for MaxSessions, the operator attempts to connect to one session per available AMP.
+ * If the value of the MaxSessions attribute for an operator is smaller than the number of operator instances, the job will abort.
+ * If the value of MaxSessions is set to a number greater than the number of available AMPs, the job runs successfully, but logs on only as many sessions as available AMPs.
+ * For some jobs, especially those running on systems with a large number of AMPS, the default session allocation (one per available database system AMP) may not be advantageous, and you may need to adjust the MaxSessions attribute value to limit the number of sessions used. After the job has run, use the evaluation criteria shown in Strategies for Balancing Sessions and Instances to help adjust and optimize the MaxSessions setting

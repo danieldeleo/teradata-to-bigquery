@@ -3,18 +3,31 @@ import datetime
 
 import airflow
 from airflow import models
+from airflow.decorators import task
 from airflow.operators.bash import BashOperator
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
     KubernetesPodOperator,
 )
 from airflow.providers.cncf.kubernetes.secret import Secret
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import (
+    GCSToBigQueryOperator,
+)
 from kubernetes.client import models as k8s
 
 """Variables for Reading from Teradata."""
 TERADATA_HOSTNAME = "10.128.0.26"
 TERADATA_USERNAME = "dbc"
-SELECT_STMT = "SELECT * FROM tpch.biglineitem;"
-# If the number of instances exceeds the number of available sessions, the job aborts.
+TABLES_TO_EXPORT = [
+    {"table_name": "lineitem", "select_stmt": "SELECT * FROM tpch.lineitem;"},
+    {"table_name": "biglineitem", "select_stmt": "SELECT * FROM tpch.biglineitem;"},
+    {"table_name": "orders", "select_stmt": "SELECT * FROM tpch.orders;"},
+    {"table_name": "part", "select_stmt": "SELECT * FROM tpch.part;"},
+    {"table_name": "partsupp", "select_stmt": "SELECT * FROM tpch.partsupp;"},
+    {"table_name": "region", "select_stmt": "SELECT * FROM tpch.region;"},
+    {"table_name": "supplier", "select_stmt": "SELECT * FROM tpch.supplier;"},
+    {"table_name": "nation", "select_stmt": "SELECT * FROM tpch.nation;"},
+]
+# If the number of instances exceeds the number of available sessions, the job aborts. 
 # Therefore, when specifying multiple instances make sure the MaxSessions attribute
 # is set to a high enough value that there is at least one session per instance.
 TD_NUM_READ_INSTANCES = 2
@@ -26,7 +39,7 @@ TD_MIN_SESSIONS = 1
 
 """Variables for writing to GCS."""
 GCS_BUCKET = "dannybq"
-GCS_PREFIX = "orders"
+GCS_PREFIX = "exported_data"
 GCS_OBJECT_NAME = "data.csv"
 # (Optional) This parameter applies only when writing to GCS. This parameter controls the sizes of GCS objects.
 GCS_MAX_OBJECT_SIZE = "64M"
@@ -87,84 +100,99 @@ GCS_SECRET_ACCESS_KEY = Secret(
 def read_export_tpt():
     with open("/home/airflow/gcs/data/export.tpt", "r") as f:
         return f.read().replace("$", r"\$")
+    
+
+def create_kpo_args():
+    kpo_args=[]
+    for table in TABLES_TO_EXPORT:
+        arguments = [
+            "-c",
+            rf"""
+            set -e && \
+            echo "{read_export_tpt()}" > export.tpt && \
+            more export.tpt && \
+            tbuild -f export.tpt -u "\
+                TD_HOSTNAME='{TERADATA_HOSTNAME}', \
+                TD_USERNAME='{TERADATA_USERNAME}', \
+                TD_PASSWORD='$TERADATA_PASSWORD', \
+                TD_NUM_READ_INSTANCES={TD_NUM_READ_INSTANCES}, \
+                GCS_NUM_WRITE_INSTANCES={GCS_NUM_WRITE_INSTANCES}, \
+                TD_MAX_SESSIONS={TD_MAX_SESSIONS}, \
+                TD_MIN_SESSIONS={TD_MIN_SESSIONS}, \
+                SELECT_STMT='{table.get('select_stmt')}', \
+                ACCESS_MODULE_INIT_STR='\
+                Bucket={GCS_BUCKET} \
+                Prefix={GCS_PREFIX}/table_name={table.get('table_name')}/try_number=$AIRFLOW_RETRY_NUMBER/ \
+                Object={GCS_OBJECT_NAME} \
+                MaxObjectSize={GCS_MAX_OBJECT_SIZE} \
+                BufferSize={GCS_BUFFER_SIZE} \
+                BufferCount={GCS_BUFFER_COUNT} \
+                ConnectionCount={GCS_CONNECTION_COUNT}'" && \
+            echo "{{\"try_number\":\"$AIRFLOW_RETRY_NUMBER\", \"table_name\":\"$TABLE_NAME\"}}" > /airflow/xcom/return.json
+            """,
+        ]
+        env_vars = {
+            "AIRFLOW_RETRY_NUMBER": "{{ task_instance.try_number }}",
+            "TABLE_NAME": table.get("table_name"),
+        }
+        kpo_args.append({"arguments": arguments, "env_vars": env_vars})
+    return kpo_args
 
 
 with models.DAG(
-    dag_id="tpt",
+    dag_id="dynamic_task_tpt",
     schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
-    max_active_tasks=1,
+    max_active_tasks=2,
     default_args={
         "retries": 10,
         "retry_delay": datetime.timedelta(seconds=10),
     },
 ) as dag:
-    for x in range(1):
-        task_id = f"tpt{x}"
-        tpt = KubernetesPodOperator(
-            task_id=task_id,
-            name="tpt",
-            cmds=["bash"],
-            arguments=[
-                "-c",
-                rf"""
-                set -e && \
-                echo "{read_export_tpt()}" > export.tpt && \
-                more export.tpt && \
-                tbuild -f export.tpt -u "\
-                  TD_HOSTNAME='{TERADATA_HOSTNAME}', \
-                  TD_USERNAME='{TERADATA_USERNAME}', \
-                  TD_PASSWORD='$TERADATA_PASSWORD', \
-                  TD_NUM_READ_INSTANCES={TD_NUM_READ_INSTANCES}, \
-                  GCS_NUM_WRITE_INSTANCES={GCS_NUM_WRITE_INSTANCES}, \
-                  TD_MAX_SESSIONS={TD_MAX_SESSIONS}, \
-                  TD_MIN_SESSIONS={TD_MIN_SESSIONS}, \
-                  SELECT_STMT='{SELECT_STMT}', \
-                  ACCESS_MODULE_INIT_STR='\
-                  Bucket={GCS_BUCKET} \
-                  Prefix={GCS_PREFIX}/task_id={task_id}/try_number=$AIRFLOW_RETRY_NUMBER/ \
-                  Object={GCS_OBJECT_NAME} \
-                  MaxObjectSize={GCS_MAX_OBJECT_SIZE} \
-                  BufferSize={GCS_BUFFER_SIZE} \
-                  BufferCount={GCS_BUFFER_COUNT} \
-                  ConnectionCount={GCS_CONNECTION_COUNT}'" && \
-                echo "{{\"try_number\":\"$AIRFLOW_RETRY_NUMBER\"}}" > /airflow/xcom/return.json
-                """,
-            ],
-            env_vars={"AIRFLOW_RETRY_NUMBER": "{{ task_instance.try_number }}"},
-            container_resources=k8s.V1ResourceRequirements(
-                requests={
-                    "cpu": "1000m",
-                    "memory": "1000Mi",
-                },
-                limits={
-                    "cpu": "2000m",
-                    "memory": "2000Mi",
-                },
-            ),
-            tolerations=[
-                {
-                    "key": "group",
-                    "operator": "Equal",
-                    "value": "composer-user-workloads",
-                    "effect": "NoSchedule",
-                }
-            ],
-            node_selector={"group": "composer-user-workloads"},
-            # Increase pod startup timeout to 10 minutes since (for first pod only)
-            # GKE autopilot needs to create new composer-user-workloads node.
-            startup_timeout_seconds=600,
-            log_events_on_failure=True,
-            do_xcom_push=True,
-            namespace="composer-user-workloads",
-            secrets=[TERADATA_PASSWORD, GCS_ACCESS_KEY, GCS_SECRET_ACCESS_KEY],
-            image="teradata/tpt:latest",
-            config_file="/home/airflow/composer_kube_config",
-            kubernetes_conn_id="kubernetes_default",
-        )
+    tpt = KubernetesPodOperator.partial(
+        task_id="tpt",
+        name="tpt",
+        cmds=["bash"],
+        container_resources=k8s.V1ResourceRequirements(
+            requests={
+                "cpu": "1000m",
+                "memory": "1000Mi",
+            },
+            limits={
+                "cpu": "2000m",
+                "memory": "2000Mi",
+            },
+        ),
+        tolerations=[
+            {
+                "key": "group",
+                "operator": "Equal",
+                "value": "composer-user-workloads",
+                "effect": "NoSchedule",
+            }
+        ],
+        node_selector={"group": "composer-user-workloads"},
+        # Increase pod startup timeout to 10 minutes since (for first pod only)
+        # GKE autopilot needs to create new composer-user-workloads node.
+        startup_timeout_seconds=600,
+        log_events_on_failure=True,
+        do_xcom_push=True,
+        namespace="composer-user-workloads",
+        secrets=[TERADATA_PASSWORD, GCS_ACCESS_KEY, GCS_SECRET_ACCESS_KEY],
+        image="teradata/tpt:latest",
+        config_file="/home/airflow/composer_kube_config",
+        kubernetes_conn_id="kubernetes_default",
+    ).expand_kwargs(create_kpo_args())
 
-    pod_task_xcom_result = BashOperator(
-        bash_command="echo \"{{ task_instance.xcom_pull('tpt0') }}\"",
-        task_id="pod_task_xcom_result",
-    )
-    tpt >> pod_task_xcom_result
+    GCSToBigQueryOperator.partial(
+        task_id="gcs_to_bq",
+        bucket=GCS_BUCKET,
+        create_disposition="CREATE_IF_NEEDED",
+        source_format="CSV",
+        write_disposition="WRITE_TRUNCATE",
+        field_delimiter="\x10",
+        autodetect=True,
+    ).expand_kwargs(tpt.output.map(lambda tpt_output: {
+        "source_objects": f"{GCS_PREFIX}/table_name={tpt_output.get('table_name')}/try_number={tpt_output.get('try_number')}/*.csv",
+        "destination_project_dataset_table": f"danny-bq.testing.{tpt_output.get('table_name')}",
+    }))
