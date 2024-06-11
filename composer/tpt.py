@@ -142,6 +142,9 @@ with models.DAG(
                     "memory": "2000Mi",
                 },
             ),
+            # To separate this pod from other Airflow system pods, add a toleration 
+            # and a node selector that defines the node on which the workload should run. 
+            # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-separation#separate-workloads-autopilot
             tolerations=[
                 {
                     "key": "group",
