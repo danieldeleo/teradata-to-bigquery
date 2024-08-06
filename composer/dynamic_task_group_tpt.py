@@ -20,12 +20,12 @@ TERADATA_USERNAME = "dbc"
 TABLES_TO_EXPORT = [
     {"table_name": "lineitem", "select_stmt": "SELECT * FROM tpch.lineitem SAMPLE 1;"},
     {"table_name": "nonexistent", "select_stmt": "SELECT * FROM nonexistent SAMPLE 1;"},
-    {"table_name": "orders", "select_stmt": "SELECT * FROM tpch.orders SAMPLE 1;"},
-    {"table_name": "part", "select_stmt": "SELECT * FROM tpch.part SAMPLE 1;"},
-    {"table_name": "partsupp", "select_stmt": "SELECT * FROM tpch.partsupp SAMPLE 1;"},
-    {"table_name": "region", "select_stmt": "SELECT * FROM tpch.region SAMPLE 1;"},
-    {"table_name": "supplier", "select_stmt": "SELECT * FROM tpch.supplier SAMPLE 1;"},
-    {"table_name": "nation", "select_stmt": "SELECT * FROM tpch.nation SAMPLE 1;"},
+    # {"table_name": "orders", "select_stmt": "SELECT * FROM tpch.orders SAMPLE 1;"},
+    # {"table_name": "part", "select_stmt": "SELECT * FROM tpch.part SAMPLE 1;"},
+    # {"table_name": "partsupp", "select_stmt": "SELECT * FROM tpch.partsupp SAMPLE 1;"},
+    # {"table_name": "region", "select_stmt": "SELECT * FROM tpch.region SAMPLE 1;"},
+    # {"table_name": "supplier", "select_stmt": "SELECT * FROM tpch.supplier SAMPLE 1;"},
+    # {"table_name": "nation", "select_stmt": "SELECT * FROM tpch.nation SAMPLE 1;"},
 ]
 # If the number of instances exceeds the number of available sessions, the job aborts.
 # Therefore, when specifying multiple instances make sure the MaxSessions attribute
@@ -103,7 +103,7 @@ with models.DAG(
     start_date=airflow.utils.dates.days_ago(1),
     max_active_tasks=2,
     default_args={
-        "retries": 2,
+        "retries": 0,
         "retry_delay": datetime.timedelta(seconds=10),
     },
     render_template_as_native_obj=True,
@@ -182,13 +182,20 @@ with models.DAG(
             arguments=kpo_args["arguments"],
         )
 
-        @task(multiple_outputs=True)
-        def get_tpt_output(tpt_output):
-            audit_logging()
-            return {
-                "source_objects": f"{GCS_PREFIX}/table_name={tpt_output.get('table_name')}/try_number={tpt_output.get('try_number')}/*.csv",
-                "destination_project_dataset_table": f"danny-bq.testing.{tpt_output.get('table_name')}",
-            }
+        @task(trigger_rule="all_done", multiple_outputs=True)
+        def get_tpt_output(tpt_output, ti):
+            prev_ti = models.TaskInstance.get_task_instance(
+                ti.dag_id, ti.run_id, "extract_table.tpt", ti.map_index
+            )
+            if prev_ti.state == "success":
+                return {
+                    "source_objects": f"{GCS_PREFIX}/table_name={tpt_output.get('table_name')}/try_number={tpt_output.get('try_number')}/*.csv",
+                    "destination_project_dataset_table": f"danny-bq.testing.{tpt_output.get('table_name')}",
+                }
+            else:
+                print(f"{prev_ti.log_url=}")
+                audit_logging()
+            raise Exception("KubernetePodOperator failed")
 
         gcs_input = get_tpt_output(tpt.output)
 
