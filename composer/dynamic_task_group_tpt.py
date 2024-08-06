@@ -103,7 +103,7 @@ with models.DAG(
     start_date=airflow.utils.dates.days_ago(1),
     max_active_tasks=2,
     default_args={
-        "retries": 0,
+        "retries": 2,
         "retry_delay": datetime.timedelta(seconds=10),
     },
     render_template_as_native_obj=True,
