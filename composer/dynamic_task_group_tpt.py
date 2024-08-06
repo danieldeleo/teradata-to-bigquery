@@ -4,6 +4,7 @@ import datetime
 import airflow
 from airflow import models
 from airflow.decorators import task
+from airflow.decorators import task_group
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
     KubernetesPodOperator,
 )
@@ -97,7 +98,7 @@ GCS_SECRET_ACCESS_KEY = Secret(
 
 
 with models.DAG(
-    dag_id="dynamic_task_tpt",
+    dag_id="dynamic_task_group_tpt",
     schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
     max_active_tasks=2,
@@ -105,6 +106,7 @@ with models.DAG(
         "retries": 2,
         "retry_delay": datetime.timedelta(seconds=10),
     },
+    render_template_as_native_obj=True,
 ) as dag:
 
     def read_export_tpt():
@@ -120,10 +122,10 @@ with models.DAG(
         audit_logging()
         return TABLES_TO_EXPORT
 
-    @task
-    def create_kpo_args(tables):
-        kpo_args = []
-        for table in tables:
+    @task_group
+    def extract_table(table):
+        @task(multiple_outputs=True)
+        def create_kpo_args(table_to_extract):
             arguments = [
                 "-c",
                 rf"""
@@ -138,74 +140,83 @@ with models.DAG(
                     GCS_NUM_WRITE_INSTANCES={GCS_NUM_WRITE_INSTANCES}, \
                     TD_MAX_SESSIONS={TD_MAX_SESSIONS}, \
                     TD_MIN_SESSIONS={TD_MIN_SESSIONS}, \
-                    SELECT_STMT='{table.get('select_stmt')}', \
+                    SELECT_STMT='{table_to_extract.get('select_stmt')}', \
                     ACCESS_MODULE_INIT_STR='\
                     Bucket={GCS_BUCKET} \
-                    Prefix={GCS_PREFIX}/table_name={table.get('table_name')}/try_number=$AIRFLOW_RETRY_NUMBER/ \
+                    Prefix={GCS_PREFIX}/table_name={table_to_extract.get('table_name')}/try_number=$AIRFLOW_RETRY_NUMBER/ \
                     Object={GCS_OBJECT_NAME} \
                     MaxObjectSize={GCS_MAX_OBJECT_SIZE} \
                     BufferSize={GCS_BUFFER_SIZE} \
                     BufferCount={GCS_BUFFER_COUNT} \
                     ConnectionCount={GCS_CONNECTION_COUNT}'" && \
-                echo "{{\"try_number\":\"$AIRFLOW_RETRY_NUMBER\", \"table_name\":\"{table.get('table_name')}\"}}" > /airflow/xcom/return.json
+                echo "{{\"try_number\":\"$AIRFLOW_RETRY_NUMBER\", \"table_name\":\"{table_to_extract.get('table_name')}\"}}" > /airflow/xcom/return.json
                 """,
             ]
-            kpo_args.append({"arguments": arguments})
-        return kpo_args
+            return {"arguments": arguments}
 
-    tpt = KubernetesPodOperator.partial(
-        task_id="tpt",
-        name="tpt",
-        cmds=["bash"],
-        container_resources=k8s.V1ResourceRequirements(
-            requests={
-                "cpu": "1000m",
-                "memory": "1000Mi",
-            },
-            limits={
-                "cpu": "2000m",
-                "memory": "2000Mi",
-            },
-        ),
-        # To separate this pod from other Airflow system pods, add a toleration
-        # and a node selector that defines the node on which the workload should run.
-        # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-separation#separate-workloads-autopilot
-        tolerations=[
-            {
-                "key": "group",
-                "operator": "Equal",
-                "value": "composer-user-workloads",
-                "effect": "NoSchedule",
+        kpo_args = create_kpo_args(table)
+        tpt = KubernetesPodOperator(
+            task_id="tpt",
+            name="tpt",
+            cmds=["bash"],
+            container_resources=k8s.V1ResourceRequirements(
+                requests={
+                    "cpu": "1000m",
+                    "memory": "1000Mi",
+                },
+                limits={
+                    "cpu": "2000m",
+                    "memory": "2000Mi",
+                },
+            ),
+            # To separate this pod from other Airflow system pods, add a toleration
+            # and a node selector that defines the node on which the workload should run.
+            # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-separation#separate-workloads-autopilot
+            tolerations=[
+                {
+                    "key": "group",
+                    "operator": "Equal",
+                    "value": "composer-user-workloads",
+                    "effect": "NoSchedule",
+                }
+            ],
+            node_selector={"group": "composer-user-workloads"},
+            # Increase pod startup timeout to 10 minutes since (for first pod only)
+            # GKE autopilot needs to create new composer-user-workloads node.
+            startup_timeout_seconds=600,
+            log_events_on_failure=True,
+            do_xcom_push=True,
+            namespace="composer-user-workloads",
+            secrets=[TERADATA_PASSWORD, GCS_ACCESS_KEY, GCS_SECRET_ACCESS_KEY],
+            image="teradata/tpt:latest",
+            config_file="/home/airflow/composer_kube_config",
+            kubernetes_conn_id="kubernetes_default",
+            env_vars={"AIRFLOW_RETRY_NUMBER": "'{{ task_instance.try_number }}'"},
+            arguments=kpo_args["arguments"],
+        )
+
+        @task(multiple_outputs=True)
+        def get_tpt_output(tpt_output):
+            audit_logging()
+            return {
+                "source_objects": f"{GCS_PREFIX}/table_name={tpt_output.get('table_name')}/try_number={tpt_output.get('try_number')}/*.csv",
+                "destination_project_dataset_table": f"danny-bq.testing.{tpt_output.get('table_name')}",
             }
-        ],
-        node_selector={"group": "composer-user-workloads"},
-        # Increase pod startup timeout to 10 minutes since (for first pod only)
-        # GKE autopilot needs to create new composer-user-workloads node.
-        startup_timeout_seconds=600,
-        log_events_on_failure=True,
-        do_xcom_push=True,
-        namespace="composer-user-workloads",
-        secrets=[TERADATA_PASSWORD, GCS_ACCESS_KEY, GCS_SECRET_ACCESS_KEY],
-        image="teradata/tpt:latest",
-        config_file="/home/airflow/composer_kube_config",
-        kubernetes_conn_id="kubernetes_default",
-        env_vars={"AIRFLOW_RETRY_NUMBER": "{{ task_instance.try_number }}"},
-    ).expand_kwargs(create_kpo_args(get_tables_to_export()))
 
-    @task(trigger_rule="all_done")
-    def get_tpt_output(tpt_output):
-        audit_logging()
-        return {
-            "source_objects": f"{GCS_PREFIX}/table_name={tpt_output.get('table_name')}/try_number={tpt_output.get('try_number')}/*.csv",
-            "destination_project_dataset_table": f"danny-bq.testing.{tpt_output.get('table_name')}",
-        }
+        gcs_input = get_tpt_output(tpt.output)
 
-    GCSToBigQueryOperator.partial(
-        task_id="gcs_to_bq",
-        bucket=GCS_BUCKET,
-        create_disposition="CREATE_IF_NEEDED",
-        source_format="CSV",
-        write_disposition="WRITE_TRUNCATE",
-        field_delimiter="\x10",
-        autodetect=True,
-    ).expand_kwargs(get_tpt_output.expand(tpt_output=tpt.output))
+        GCSToBigQueryOperator(
+            task_id="gcs_to_bq",
+            bucket=GCS_BUCKET,
+            create_disposition="CREATE_IF_NEEDED",
+            source_format="CSV",
+            write_disposition="WRITE_TRUNCATE",
+            field_delimiter="\x10",
+            autodetect=True,
+            source_objects=gcs_input["source_objects"],
+            destination_project_dataset_table=gcs_input[
+                "destination_project_dataset_table"
+            ],
+        )
+
+    extract_table.expand(table=get_tables_to_export())
