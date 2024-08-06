@@ -169,6 +169,7 @@ with models.DAG(
                     "memory": "2000Mi",
                 },
             ),
+            # Increase pod startup timeout to 10 minutes
             startup_timeout_seconds=600,
             log_events_on_failure=True,
             do_xcom_push=True,
