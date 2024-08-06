@@ -48,4 +48,6 @@ with models.DAG(
                     "memory": "64Mi",
                 },
             ),
+            # Increase pod startup timeout to 10 minutes
+            startup_timeout_seconds=600,
         )
