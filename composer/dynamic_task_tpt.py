@@ -3,7 +3,7 @@ import datetime
 
 import airflow
 from airflow import models
-from airflow.decorators import task
+from airflow.decorators import dag, task
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
     KubernetesPodOperator,
 )
@@ -96,8 +96,7 @@ GCS_SECRET_ACCESS_KEY = Secret(
 )
 
 
-with models.DAG(
-    dag_id="dynamic_task_tpt",
+@dag(
     schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
     max_active_tasks=2,
@@ -105,8 +104,8 @@ with models.DAG(
         "retries": 2,
         "retry_delay": datetime.timedelta(seconds=10),
     },
-) as dag:
-
+)
+def dynamic_task_tpt():
     def read_export_tpt():
         with open("/home/airflow/gcs/data/export.tpt", "r") as f:
             return f.read().replace("$", r"\$")
@@ -203,3 +202,7 @@ with models.DAG(
         field_delimiter="\x10",
         autodetect=True,
     ).expand_kwargs(get_tpt_output.expand(tpt_output=tpt.output))
+
+
+# Instantiate the DAG
+dynamic_task_tpt()
