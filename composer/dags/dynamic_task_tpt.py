@@ -1,4 +1,5 @@
 """An example for using Teradata Parallel Transporter (TPT) with Composer."""
+
 import datetime
 
 import airflow
@@ -135,16 +136,16 @@ def dynamic_task_tpt():
                     GCS_NUM_WRITE_INSTANCES={GCS_NUM_WRITE_INSTANCES}, \
                     TD_MAX_SESSIONS={TD_MAX_SESSIONS}, \
                     TD_MIN_SESSIONS={TD_MIN_SESSIONS}, \
-                    SELECT_STMT='{table.get('select_stmt')}', \
+                    SELECT_STMT='{table.get("select_stmt")}', \
                     ACCESS_MODULE_INIT_STR='\
                     Bucket={GCS_BUCKET} \
-                    Prefix={GCS_PREFIX}/table_name={table.get('table_name')}/try_number=$AIRFLOW_RETRY_NUMBER/ \
+                    Prefix={GCS_PREFIX}/table_name={table.get("table_name")}/try_number=$AIRFLOW_RETRY_NUMBER/ \
                     Object={GCS_OBJECT_NAME} \
                     MaxObjectSize={GCS_MAX_OBJECT_SIZE} \
                     BufferSize={GCS_BUFFER_SIZE} \
                     BufferCount={GCS_BUFFER_COUNT} \
                     ConnectionCount={GCS_CONNECTION_COUNT}'" && \
-                echo "{{\"try_number\":\"$AIRFLOW_RETRY_NUMBER\", \"table_name\":\"{table.get('table_name')}\"}}" > /airflow/xcom/return.json
+                echo "{{\"try_number\":\"$AIRFLOW_RETRY_NUMBER\", \"table_name\":\"{table.get("table_name")}\"}}" > /airflow/xcom/return.json
                 """,
             ]
             kpo_args.append({"arguments": arguments})
