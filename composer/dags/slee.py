@@ -3,9 +3,7 @@ import datetime
 
 import airflow
 from airflow import models
-from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
-    KubernetesPodOperator,
-)
+from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from kubernetes.client import models as k8s
 
 with models.DAG(

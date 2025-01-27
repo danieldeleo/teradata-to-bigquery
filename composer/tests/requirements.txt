@@ -1,0 +1,10 @@
+# Run the following commands to install the required packages
+# and run the tests.
+#
+# uv venv -p 3.11.8
+# uv pip install -r requirements.txt
+# uv run python *.py
+# uv run pytest -vv test_dag_serialization.py
+apache-airflow[google,cncf-kubernetes]==2.10.2
+apache-airflow-providers-cncf-kubernetes==10.0.1
+pytest

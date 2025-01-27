@@ -3,25 +3,25 @@ DEFINE JOB EXPORT_FROM_TERADATA_TO_GCS
 DESCRIPTION 'Export from Teradata to GCS' 
 ( 
   STEP EXPORT_THE_DATA (
-    APPLY TO OPERATOR ($FILE_WRITER()[2]
+    APPLY TO OPERATOR ($FILE_WRITER()[@GCS_NUM_WRITE_INSTANCES]
       ATTR
       (
-        AccessModuleName = 'libgcsaxsmod.so',
-        AccessModuleInitStr = @jobvar_accessmoduleinitstr,
-        Format = 'Delimited',
-        TextDelimiterHex = '10'
+        AccessModuleName    = 'libgcsaxsmod.so',
+        AccessModuleInitStr = @ACCESS_MODULE_INIT_STR,
+        Format              = 'Delimited',
+        TextDelimiterHex    = '10'
       )
     )
-    SELECT * FROM OPERATOR ($EXPORT()[2]
+    SELECT * FROM OPERATOR ($EXPORT()[@TD_NUM_READ_INSTANCES]
       ATTR
       (
-        TdpId = @jobvar_tdpid,
-        UserName = @jobvar_username,
-        UserPassword = @jobvar_password,
-        SelectStmt = @jobvar_selectstmt,
-        DateForm='ansiDate'
-        /* MaxSessions=6 */
-        /* MinSessions=3 */
+        TdpId        = @TD_HOSTNAME,
+        UserName     = @TD_USERNAME,
+        UserPassword = @TD_PASSWORD,
+        SelectStmt   = @SELECT_STMT,
+        MaxSessions  = @TD_MAX_SESSIONS,
+        MinSessions  = @TD_MIN_SESSIONS,
+        DateForm     = 'ansiDate'
       )
     );
   );

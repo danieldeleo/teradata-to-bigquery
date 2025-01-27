@@ -3,21 +3,32 @@ import datetime
 
 import airflow
 from airflow import models
-from airflow.operators.bash import BashOperator
-from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
-    KubernetesPodOperator,
-)
+from airflow.decorators import dag, task, task_group
+from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
+from airflow.exceptions import AirflowFailException
 from airflow.providers.cncf.kubernetes.secret import Secret
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import (
+    GCSToBigQueryOperator,
+)
 from kubernetes.client import models as k8s
 
 """Variables for Reading from Teradata."""
-TERADATA_HOSTNAME = "10.128.0.26"
+TERADATA_HOSTNAME = "10.128.0.57"
 TERADATA_USERNAME = "dbc"
-SELECT_STMT = "SELECT * FROM tpch.biglineitem;"
+TABLES_TO_EXPORT = [
+    {"table_name": "lineitem", "select_stmt": "SELECT * FROM tpch.lineitem SAMPLE 1;"},
+    {"table_name": "nonexistent", "select_stmt": "SELECT * FROM nonexistent SAMPLE 1;"},
+    # {"table_name": "orders", "select_stmt": "SELECT * FROM tpch.orders SAMPLE 1;"},
+    # {"table_name": "part", "select_stmt": "SELECT * FROM tpch.part SAMPLE 1;"},
+    # {"table_name": "partsupp", "select_stmt": "SELECT * FROM tpch.partsupp SAMPLE 1;"},
+    # {"table_name": "region", "select_stmt": "SELECT * FROM tpch.region SAMPLE 1;"},
+    # {"table_name": "supplier", "select_stmt": "SELECT * FROM tpch.supplier SAMPLE 1;"},
+    # {"table_name": "nation", "select_stmt": "SELECT * FROM tpch.nation SAMPLE 1;"},
+]
 # If the number of instances exceeds the number of available sessions, the job aborts.
 # Therefore, when specifying multiple instances make sure the MaxSessions attribute
 # is set to a high enough value that there is at least one session per instance.
-TD_NUM_READ_INSTANCES = 2
+TD_NUM_READ_INSTANCES = 1
 # The maximum sessions connected can never exceed the number of
 # available AMPs in the system, even if a larger number is specified.
 # The default is one session per available AMP.
@@ -26,7 +37,7 @@ TD_MIN_SESSIONS = 1
 
 """Variables for writing to GCS."""
 GCS_BUCKET = "dannybq"
-GCS_PREFIX = "orders"
+GCS_PREFIX = "exported_data"
 GCS_OBJECT_NAME = "data.csv"
 # (Optional) This parameter applies only when writing to GCS. This parameter controls the sizes of GCS objects.
 GCS_MAX_OBJECT_SIZE = "64M"
@@ -49,7 +60,7 @@ GCS_BUFFER_COUNT = 2 * int(GCS_CONNECTION_COUNT)
 # objects in GCS will have the following naming convention:
 #
 # <base-object-name>-<instance number>
-GCS_NUM_WRITE_INSTANCES = 10
+GCS_NUM_WRITE_INSTANCES = 1
 
 
 """
@@ -84,54 +95,67 @@ GCS_SECRET_ACCESS_KEY = Secret(
 )
 
 
-def read_export_tpt():
-    with open("/home/airflow/gcs/data/export.tpt", "r") as f:
-        return f.read().replace("$", r"\$")
-
-
-with models.DAG(
-    dag_id="tpt",
+@dag(
     schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
-    max_active_tasks=1,
+    max_active_tasks=2,
     default_args={
-        "retries": 10,
+        "retries": 2,
         "retry_delay": datetime.timedelta(seconds=10),
     },
-) as dag:
-    for x in range(1):
-        task_id = f"tpt{x}"
-        tpt = KubernetesPodOperator(
-            task_id=task_id,
-            name="tpt",
-            cmds=["bash"],
-            arguments=[
+    render_template_as_native_obj=True,
+)
+def dynamic_task_group_tpt():
+    def read_export_tpt():
+        with open("/home/airflow/gcs/data/export.tpt", "r") as f:
+            return f.read().replace("$", r"\$")
+
+    def audit_logging():
+        # Insert audit logging logic here
+        pass
+
+    @task
+    def get_tables_to_export():
+        audit_logging()
+        return TABLES_TO_EXPORT
+
+    @task_group
+    def extract_table(table):
+        @task(multiple_outputs=True)
+        def create_kpo_args(table_to_extract):
+            arguments = [
                 "-c",
                 rf"""
                 set -e && \
                 echo "{read_export_tpt()}" > export.tpt && \
                 more export.tpt && \
                 tbuild -f export.tpt -u "\
-                  TD_HOSTNAME='{TERADATA_HOSTNAME}', \
-                  TD_USERNAME='{TERADATA_USERNAME}', \
-                  TD_PASSWORD='$TERADATA_PASSWORD', \
-                  TD_NUM_READ_INSTANCES={TD_NUM_READ_INSTANCES}, \
-                  GCS_NUM_WRITE_INSTANCES={GCS_NUM_WRITE_INSTANCES}, \
-                  TD_MAX_SESSIONS={TD_MAX_SESSIONS}, \
-                  TD_MIN_SESSIONS={TD_MIN_SESSIONS}, \
-                  SELECT_STMT='{SELECT_STMT}', \
-                  ACCESS_MODULE_INIT_STR='\
-                  Bucket={GCS_BUCKET} \
-                  Prefix={GCS_PREFIX}/task_id={task_id}/try_number=$AIRFLOW_RETRY_NUMBER/ \
-                  Object={GCS_OBJECT_NAME} \
-                  MaxObjectSize={GCS_MAX_OBJECT_SIZE} \
-                  BufferSize={GCS_BUFFER_SIZE} \
-                  BufferCount={GCS_BUFFER_COUNT} \
-                  ConnectionCount={GCS_CONNECTION_COUNT}'" && \
-                echo "{{\"try_number\":\"$AIRFLOW_RETRY_NUMBER\"}}" > /airflow/xcom/return.json
+                    TD_HOSTNAME='{TERADATA_HOSTNAME}', \
+                    TD_USERNAME='{TERADATA_USERNAME}', \
+                    TD_PASSWORD='$TERADATA_PASSWORD', \
+                    TD_NUM_READ_INSTANCES={TD_NUM_READ_INSTANCES}, \
+                    GCS_NUM_WRITE_INSTANCES={GCS_NUM_WRITE_INSTANCES}, \
+                    TD_MAX_SESSIONS={TD_MAX_SESSIONS}, \
+                    TD_MIN_SESSIONS={TD_MIN_SESSIONS}, \
+                    SELECT_STMT='{table_to_extract.get('select_stmt')}', \
+                    ACCESS_MODULE_INIT_STR='\
+                    Bucket={GCS_BUCKET} \
+                    Prefix={GCS_PREFIX}/table_name={table_to_extract.get('table_name')}/try_number=$AIRFLOW_RETRY_NUMBER/ \
+                    Object={GCS_OBJECT_NAME} \
+                    MaxObjectSize={GCS_MAX_OBJECT_SIZE} \
+                    BufferSize={GCS_BUFFER_SIZE} \
+                    BufferCount={GCS_BUFFER_COUNT} \
+                    ConnectionCount={GCS_CONNECTION_COUNT}'" && \
+                echo "{{\"try_number\":\"$AIRFLOW_RETRY_NUMBER\", \"table_name\":\"{table_to_extract.get('table_name')}\"}}" > /airflow/xcom/return.json
                 """,
-            ],
-            env_vars={"AIRFLOW_RETRY_NUMBER": "{{ task_instance.try_number }}"},
+            ]
+            return {"arguments": arguments}
+
+        kpo_args = create_kpo_args(table)
+        tpt = KubernetesPodOperator(
+            task_id="tpt",
+            name="tpt",
+            cmds=["bash"],
             container_resources=k8s.V1ResourceRequirements(
                 requests={
                     "cpu": "1000m",
@@ -151,10 +175,49 @@ with models.DAG(
             image="teradata/tpt:latest",
             config_file="/home/airflow/composer_kube_config",
             kubernetes_conn_id="kubernetes_default",
+            env_vars={"AIRFLOW_RETRY_NUMBER": "'{{ task_instance.try_number }}'"},
+            arguments=kpo_args["arguments"],
         )
 
-    pod_task_xcom_result = BashOperator(
-        bash_command="echo \"{{ task_instance.xcom_pull('tpt0') }}\"",
-        task_id="pod_task_xcom_result",
-    )
-    tpt >> pod_task_xcom_result
+        @task(trigger_rule="all_done", multiple_outputs=True)
+        def get_tpt_output(tpt_output, ti):
+            prev_ti = models.TaskInstance.get_task_instance(
+                ti.dag_id, ti.run_id, "extract_table.tpt", ti.map_index
+            )
+            if prev_ti.state == "success":
+                return {
+                    "source_objects": f"{GCS_PREFIX}/table_name={tpt_output.get('table_name')}/try_number={tpt_output.get('try_number')}/*.csv",
+                    "destination_project_dataset_table": f"danny-bq.testing.{tpt_output.get('table_name')}",
+                }
+            else:
+                print(f"{prev_ti.log_url=}")
+                audit_logging()
+            # AirflowFailException will mark the current task as failed ignoring any remaining retry attempts
+            raise AirflowFailException("KubernetePodOperator failed")
+
+        gcs_input = get_tpt_output(tpt.output)
+
+        bq_load_results = GCSToBigQueryOperator(
+            task_id="gcs_to_bq",
+            bucket=GCS_BUCKET,
+            create_disposition="CREATE_IF_NEEDED",
+            source_format="CSV",
+            write_disposition="WRITE_TRUNCATE",
+            field_delimiter="\x10",
+            autodetect=True,
+            source_objects=gcs_input["source_objects"],
+            destination_project_dataset_table=gcs_input[
+                "destination_project_dataset_table"
+            ]
+        )
+
+        @task(trigger_rule="all_done")
+        def process_bq_load_results(bq_load_results):
+            print(f"{bq_load_results=}")
+
+        process_bq_load_results(bq_load_results.output)
+    extract_table.expand(table=get_tables_to_export())
+
+
+# Instantiate the DAG
+dynamic_task_group_tpt()

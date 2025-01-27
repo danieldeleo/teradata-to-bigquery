@@ -4,9 +4,7 @@ import datetime
 import airflow
 from airflow import models
 from airflow.decorators import dag, task
-from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
-    KubernetesPodOperator,
-)
+from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from airflow.providers.cncf.kubernetes.secret import Secret
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import (
     GCSToBigQueryOperator,
