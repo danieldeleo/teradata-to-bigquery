@@ -14,4 +14,4 @@ def test_dag_import_errors(dagbag):
 
 
 def test_dag_import_warnings(dagbag):
-    assert dagbag.captured_warnings == {}, "No warnings should be captured"
+    assert dagbag.captured_warnings == 0, "No warnings should be captured"
