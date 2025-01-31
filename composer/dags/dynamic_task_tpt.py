@@ -157,12 +157,12 @@ def dynamic_task_tpt():
         cmds=["bash"],
         container_resources=k8s.V1ResourceRequirements(
             requests={
-                "cpu": "1000m",
-                "memory": "1000Mi",
+                "cpu": "8000m",
+                "memory": "16000Mi",
             },
             limits={
-                "cpu": "2000m",
-                "memory": "2000Mi",
+                "cpu": "8000m",
+                "memory": "16000Mi",
             },
         ),
         # Increase pod startup timeout to 10 minutes
