@@ -2,7 +2,13 @@ steps:
   # install dependencies
   - name: python:3.11.8-slim
     entrypoint: pip
-    args: ["install", "-r", "composer/tests/requirements.txt"]
+    args: [
+      "install", 
+      "--requirement",
+      "composer/tests/requirements.txt",
+      "--constraint",
+      "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.8.txt"
+    ]
 
   # run in python 3.11 which is latest version in Cloud Composer
   - name: python:3.11.8-slim
