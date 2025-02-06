@@ -7,8 +7,7 @@ steps:
       "--requirement",
       "composer/tests/requirements.txt",
       "--constraint",
-      "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt",
-      "--user"
+      "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt"
     ]
 
   # run in python 3.11 which is latest version in Cloud Composer
