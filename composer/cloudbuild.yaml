@@ -2,9 +2,9 @@ steps:
   # install dependencies
   - name: python:3.11.8-slim
     entrypoint: pip
-    args: ["install", "-r", "tests/requirements.txt"]
+    args: ["install", "-r", "composer/tests/requirements.txt"]
 
   # run in python 3.11 which is latest version in Cloud Composer
   - name: python:3.11.8-slim
     entrypoint: python
-    args: ["-m", "pytest", "-s", "tests/"]
+    args: ["-m", "pytest", "-s", "composer/tests/"]
