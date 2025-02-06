@@ -7,7 +7,7 @@ from airflow.models import DagBag
 
 @pytest.fixture()
 def dagbag():
-    return DagBag("../dags", include_examples=False)
+    return DagBag("dags", include_examples=False)
 
 
 def test_dag_import_errors(dagbag):
