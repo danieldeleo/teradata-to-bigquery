@@ -5,26 +5,25 @@
 # uv pip install -r requirements.txt
 # uv run pytest -vv test_dag_serialization.py
 pytest
-
 apache-airflow[google]==2.10.2
 
-apache-airflow-providers-amazon==6.0.0
-apache-airflow-providers-jdbc==3.2.0
-apache-airflow-providers-opsgenie==5.0.0
-apache-airflow-providers-oracle==3.7.4
-apache-airflow-providers-sftp==4.1.0
-apache-airflow-providers-teradata==2.0.0
-cloudstorage==0.11.0
-# importlib==1.0.4
-oracledb==1.3.2
-# pysensors==0.0.4
-pyspark==3.4.0
-scikit-learn==1.2.0
-sqlalchemy-teradata==0.9.0.dev0
-sqlvalidator==0.0.19
-unlzw3==0.2.2
-xmltodict==0.13.0
-python-docx==0.8.11
-pandasql==0.7.3
-teradatasqlalchemy==20.0.0.1
-apache-airflow-providers-salesforce==5.9.0
+# apache-airflow-providers-amazon==6.0.0
+# apache-airflow-providers-jdbc==3.2.0
+# apache-airflow-providers-opsgenie==5.0.0
+# apache-airflow-providers-oracle==3.7.4
+# apache-airflow-providers-sftp==4.1.0
+# apache-airflow-providers-teradata==2.0.0
+# cloudstorage==0.11.0
+# # importlib==1.0.4
+# oracledb==1.3.2
+# # pysensors==0.0.4
+# pyspark==3.4.0
+# scikit-learn==1.2.0
+# sqlalchemy-teradata==0.9.0.dev0
+# sqlvalidator==0.0.19
+# unlzw3==0.2.2
+# xmltodict==0.13.0
+# python-docx==0.8.11
+# pandasql==0.7.3
+# teradatasqlalchemy==20.0.0.1
+# apache-airflow-providers-salesforce==5.9.0
