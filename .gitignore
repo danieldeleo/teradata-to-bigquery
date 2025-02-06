@@ -33,6 +33,7 @@ issue/
 env/
 .env/
 .venv/
+venv/
 /pythonenv*/
 3rdparty/
 .tox
