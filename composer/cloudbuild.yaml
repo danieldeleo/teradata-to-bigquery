@@ -1,5 +1,5 @@
 steps:
-  # install dependencies
+  # Install the Python dependencies you need for your DAGs
   - name: python:3.11.8-slim
     entrypoint: pip
     args: [
@@ -14,8 +14,16 @@ steps:
       "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt",
       "--user"
     ]
-
-  # run in python 3.11 which is latest version in Cloud Composer
+  # Run DAG unit tests 
   - name: python:3.11.8-slim
     entrypoint: python3.11
     args: ["-m", "pytest", "-s", "composer/tests/"]
+  # Copy DAGs to the Composer /dags Cloud Storage folder only if unit tests pass
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: gcloud
+    args: [
+      storage,
+      cp,
+      composer/dags/*.py,
+      gs://us-central1-small-3cd6c755-bucket/dags/
+    ]
