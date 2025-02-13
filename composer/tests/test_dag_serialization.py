@@ -4,19 +4,22 @@ import sys
 import pytest
 from airflow.models import DagBag
 
+dags_path = Path('dags')
+sys.path.insert(0, dags_path.resolve())
+print(dags_path.resolve())
 
 @pytest.fixture(scope="session")
 def dagbag():
-    dags_path = Path('../dags')
-    sys.path.insert(0, dags_path)
-    return DagBag(Path('../dags'), include_examples=False)
+    return DagBag(dags_path.resolve(), include_examples=False)
 
+def test_dagbag_not_empty(dagbag):
+    assert dagbag.size() > 0, "Dagbag should not be empty."
 
-def test_dag_import_errors(dagbag):
+def test_dagbag_no_import_errors(dagbag):
     assert dagbag.import_errors == {}, "No import errors should be found."
 
 ''' Uncomment below if you want to fail on warnings
-def test_dag_import_warnings(dagbag):
+def test_dagbag_no_import_warnings(dagbag):
     assert len(dagbag.captured_warnings) == 0, "No warnings should be found."
 '''
 
