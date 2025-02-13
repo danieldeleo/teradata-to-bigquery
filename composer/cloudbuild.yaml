@@ -7,6 +7,10 @@ steps:
       "--requirement",
       "composer/tests/requirements.txt",
       "--constraint",
+      # Pin dependencies to the same versions used in your Composer instance by specifying a constraints file
+      # https://airflow.apache.org/docs/apache-airflow/stable/installation/installing-from-pypi.html#constraints-files
+      # Match your Airflow & Python version using the following templated link:
+      # https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt
       "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt",
       "--user"
     ]
