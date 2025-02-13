@@ -4,11 +4,11 @@ import datetime
 
 import airflow
 from airflow import models
-from airflow.providers.cncf.kubernetes.operators.pod import ubernetesPodOperator
+from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from kubernetes.client import models as k8s
 
 with models.DAG(
-    dag_id="sleep",
+    dag_id="sleepy",
     schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
     max_active_tasks=100,

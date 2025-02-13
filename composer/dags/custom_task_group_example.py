@@ -1,4 +1,4 @@
-from airflow.decorators import dag, task
+from airflow.decorators import dag
 
 from custom_task_group_class import CustomTaskGroup
 
