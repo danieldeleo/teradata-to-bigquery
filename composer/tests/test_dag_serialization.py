@@ -4,13 +4,12 @@ import sys
 import pytest
 from airflow.models import DagBag
 
-dags_path = Path('dags')
-sys.path.insert(0, dags_path.resolve())
-print(dags_path.resolve())
+dags_path = Path('dags').resolve()
+sys.path.insert(0, dags_path)
 
 @pytest.fixture(scope="session")
 def dagbag():
-    return DagBag(dags_path.resolve(), include_examples=False)
+    return DagBag(dags_path, include_examples=False)
 
 def test_dagbag_not_empty(dagbag):
     assert dagbag.size() > 0, "Dagbag should not be empty."
