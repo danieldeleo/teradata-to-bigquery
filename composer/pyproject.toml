@@ -6,6 +6,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "apache-airflow-providers-cncf-kubernetes==10.0.1",
-    "apache-airflow[google]==2.10.2",
+    "apache-airflow[cncf-kubernetes,google]==2.10.2",
     "pytest>=8.3.4",
 ]

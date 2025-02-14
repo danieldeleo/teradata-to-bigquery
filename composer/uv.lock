@@ -213,6 +213,9 @@ wheels = [
 ]
 
 [package.optional-dependencies]
+cncf-kubernetes = [
+    { name = "apache-airflow-providers-cncf-kubernetes" },
+]
 google = [
     { name = "apache-airflow-providers-google" },
 ]
@@ -673,14 +676,14 @@ name = "composer"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "apache-airflow", extra = ["google"] },
+    { name = "apache-airflow", extra = ["cncf-kubernetes", "google"] },
     { name = "apache-airflow-providers-cncf-kubernetes" },
     { name = "pytest" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "apache-airflow", extras = ["google"], specifier = "==2.10.2" },
+    { name = "apache-airflow", extras = ["cncf-kubernetes", "google"], specifier = "==2.10.2" },
     { name = "apache-airflow-providers-cncf-kubernetes", specifier = "==10.0.1" },
     { name = "pytest", specifier = ">=8.3.4" },
 ]

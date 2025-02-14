@@ -5,10 +5,10 @@ import custom_task_group_class
 
 
 @dag(schedule=None, catchup=False)
-def custom_tg():
+def custom_task_group_example():
     ctg = custom_task_group_class.CustomTaskGroup(
         group_id="my_custom_task_group", files=["file1", "file2", "file3", "file4"]
     )
 
 
-custom_tg()
+custom_task_group_example()
