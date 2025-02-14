@@ -7,7 +7,7 @@ from airflow.models import DagBag
 
 @pytest.fixture(scope="session")
 def dagbag():
-    dags_path = str(Path(__file__).parent.parent / "dags")
+    dags_path = str((Path(__file__).parent.parent / "dags").resolve())
     sys.path.insert(0, dags_path)
     yield DagBag(dag_folder=dags_path, include_examples=False)
 

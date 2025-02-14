@@ -1,4 +1,6 @@
 from airflow.decorators import dag
+import sys
+print(sys.path)
 from custom_task_group_class import CustomTaskGroup
 
 
