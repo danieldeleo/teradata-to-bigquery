@@ -9,6 +9,7 @@ steps:
     dir: composer
     script: |
       #!/usr/bin/env bash
+      set -eo pipefail  # Enable exit-on-error mode
       pip install \
         --requirement tests/requirements.txt \
         --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt
@@ -19,4 +20,5 @@ steps:
   - name: gcr.io/cloud-builders/gcloud
     script: |
       #!/usr/bin/env bash
+      set -eo pipefail  # Enable exit-on-error mode
       gcloud storage cp composer/dags/*.py gs://us-central1-small-3cd6c755-bucket/dags/

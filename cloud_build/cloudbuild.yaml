@@ -4,7 +4,7 @@ steps:
   ############################################################
 - name: teradata/tpt:latest
   script: |
-    #!/bin/bash
+    #!/usr/bin/env bash
     set -eo pipefail  # Enable exit-on-error mode
     tbuild -f export.tpt -u "
       TD_HOSTNAME='${TERADATA_HOSTNAME}',
