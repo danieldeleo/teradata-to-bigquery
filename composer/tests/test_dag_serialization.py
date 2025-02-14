@@ -4,14 +4,11 @@ import sys
 import pytest
 from airflow.models import DagBag
 
-DAG_DIRS = ["dags"]
-
 
 @pytest.fixture(scope="session")
 def dagbag():
-    """Copies contents of dags/ folders to a temporary directory"""
-    dags_path = Path(__file__).parent.parent / "dags"
-    sys.path.insert(0, str(dags_path))
+    dags_path = str(Path(__file__).parent.parent / "dags")
+    sys.path.insert(0, dags_path)
     yield DagBag(dag_folder=dags_path, include_examples=False)
 
 def test_dagbag_not_empty(dagbag):
