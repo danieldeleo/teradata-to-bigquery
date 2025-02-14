@@ -7,7 +7,7 @@ steps:
   - name: python:3.11.8-slim
     script: |
       #!/usr/bin/env bash
-      python3 -m venv venv
+      python3 -m venv /workspace/venv
       pip install \
         --requirement composer/tests/requirements.txt \
         --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt \
@@ -18,7 +18,7 @@ steps:
     script: |
       #!/usr/bin/env bash
       airflow standalone
-      source venv/bin/activate
+      source /workspace/venv/bin/activate
       python3 -m pytest -s tests
   # Copy DAGs to the Composer /dags Cloud Storage folder only if unit tests pass
   - name: gcr.io/cloud-builders/gcloud
