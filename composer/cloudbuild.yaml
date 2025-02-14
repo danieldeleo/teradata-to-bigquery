@@ -11,7 +11,6 @@ steps:
         --requirement composer/tests/requirements.txt \
         --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt \
         --user
-      which airflow
   # Run DAG unit tests 
   - name: python:3.11.8-slim
     dir: composer
