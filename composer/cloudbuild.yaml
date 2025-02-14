@@ -14,6 +14,10 @@ steps:
       "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt",
       "--user"
     ]
+  - name: apache/airflow:2.10.2-python3.11
+    entrypoint: bash
+    dir: composer/tests
+    args: ["-c", "airflow db init"]
   # Run DAG unit tests 
   - name: python:3.11.8-slim
     entrypoint: python3.11
