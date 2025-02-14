@@ -28,3 +28,8 @@ def test_filename_matches_dag_id(dagbag):
         assert dag.dag_id == Path(dag.relative_fileloc).stem, (
             "Filename does not match DAG ID."
         )
+
+def test_sleepy_dag(dagbag):
+    dag = dagbag.get_dag("sleepy")
+    assert dag is not None, "DAG sleepy not found."
+    assert len(dag.tasks) == 10, "DAG sleepy should contain 10 tasks."
