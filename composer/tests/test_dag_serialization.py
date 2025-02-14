@@ -1,7 +1,5 @@
 from pathlib import Path
 import sys
-import tempfile
-from shutil import copytree
 
 import pytest
 from airflow.models import DagBag
@@ -12,15 +10,9 @@ DAG_DIRS = ["dags"]
 @pytest.fixture(scope="session")
 def dagbag():
     """Copies contents of dags/ folders to a temporary directory"""
-    temp_dir = tempfile.mkdtemp()
-    for d in DAG_DIRS:
-        copytree(
-            Path(__file__).parent.parent / d ,
-            f"{temp_dir}/",
-            dirs_exist_ok=True,
-        )
-    sys.path.insert(0, temp_dir)
-    yield DagBag(dag_folder=temp_dir, include_examples=False)
+    dags_path = Path(__file__).parent.parent / "dags"
+    sys.path.insert(0, str(dags_path))
+    yield DagBag(dag_folder=dags_path, include_examples=False)
 
 def test_dagbag_not_empty(dagbag):
     assert dagbag.size() > 0, "Dagbag should not be empty."
