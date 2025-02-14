@@ -1,12 +1,10 @@
 from airflow.decorators import dag
-import sys
-print(sys.path)
-import custom_task_group_class
+from custom_task_group_class import CustomTaskGroup
 
 
 @dag(schedule=None, catchup=False)
 def custom_task_group_example():
-    ctg = custom_task_group_class.CustomTaskGroup(
+    ctg = CustomTaskGroup(
         group_id="my_custom_task_group", files=["file1", "file2", "file3", "file4"]
     )
 
