@@ -16,8 +16,8 @@ steps:
     dir: composer
     script: |
       #!/usr/bin/env bash
-      airflow standalone
-      pytest -s tests
+      /builder/home/.local/bin/airflow standalone
+      python3 -m pytest -s tests
   # Copy DAGs to the Composer /dags Cloud Storage folder only if unit tests pass
   - name: gcr.io/cloud-builders/gcloud
     script: |
