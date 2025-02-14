@@ -11,8 +11,7 @@ steps:
       #!/usr/bin/env bash
       pip install \
         --requirement composer/tests/requirements.txt \
-        --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt \
-        --user
+        --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt
       airflow standalone &
       airflow db check
       python3 -m pytest -s tests
