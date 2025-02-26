@@ -5,7 +5,7 @@ steps:
   # Match your Airflow & Python version using the following templated link:
   # https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt
   # Run DAG unit tests 
-  - name: apache/airflow:2.10.2-python3.11
+  - name: us-docker.pkg.dev/cloud-airflow-releaser/airflow-worker-scheduler-2-10-2/airflow-worker-scheduler-2-10-2:composer-2.10.2-airflow-2-10-2 # apache/airflow:2.10.2-python3.11
     dir: composer
     script: |
       #!/usr/bin/env bash
