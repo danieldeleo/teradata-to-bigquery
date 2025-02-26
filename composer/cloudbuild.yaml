@@ -10,6 +10,7 @@ steps:
     script: |
       #!/usr/bin/env bash
       set -eo pipefail  # Enable exit-on-error mode
+      chmod -R a+rw .
       pip install \
         --requirement tests/requirements.txt \
         --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt
