@@ -1,2 +1,2 @@
 pytest
-apache-airflow[google,cncf.kubernetes]==2.10.2
+# apache-airflow[google,cncf.kubernetes]==2.10.2
