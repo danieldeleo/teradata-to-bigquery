@@ -5,11 +5,16 @@ steps:
   # Match your Airflow & Python version using the following templated link:
   # https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt
   # Run DAG unit tests 
-  - name: us-docker.pkg.dev/cloud-airflow-releaser/airflow-worker-scheduler-2-10-2/airflow-worker-scheduler-2-10-2:composer-2.10.2-airflow-2-10-2 # apache/airflow:2.10.2-python3.11
+  - name: apache/airflow:2.10.2-python3.11
     dir: composer
     script: |
       #!/usr/bin/env bash
       set -eo pipefail  # Enable exit-on-error mode
+      pip install \
+        --requirement tests/requirements.txt \
+        --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt
+      airflow standalone &
+      airflow db check
       python3 -m pytest -s tests
   # Copy DAGs to the Composer /dags Cloud Storage folder only if unit tests pass
   - name: gcr.io/cloud-builders/gcloud
