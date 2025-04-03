@@ -16,11 +16,6 @@ steps:
       airflow standalone &
       airflow db check
       python3 -m pytest -s tests
-  # Run DAG unit tests 
-  - name: python:3.11.8
-    entrypoint: python3.11
-    dir: composer
-    args: ["-m", "pytest", "-s"]
   # Copy DAGs to the Composer /dags Cloud Storage folder only if unit tests pass
   - name: gcr.io/cloud-builders/gcloud
     script: |
