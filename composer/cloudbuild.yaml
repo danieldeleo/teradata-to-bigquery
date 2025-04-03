@@ -18,7 +18,7 @@ steps:
   #     python3 -m pytest -s tests
   
   # Install the Python dependencies you need for your DAGs
-  - name: python:3.11.8-slim
+  - name: python:3.11.8
     entrypoint: pip
     args: [
       "install", 
@@ -33,7 +33,7 @@ steps:
       "--user"
     ]
   # Run DAG unit tests 
-  - name: python:3.11.8-slim
+  - name: python:3.11.8
     entrypoint: python3.11
     dir: composer
     args: ["-m", "pytest", "-s"]
