@@ -40,7 +40,7 @@ with DAG(
         # Optional: Define how long the sensor should wait before timing out
         # timeout=60 * 60 * 2, # Timeout after 2 hours (optional)
         # Optional: Polling interval when not deferred (less relevant in deferrable mode)
-        # poke_interval=60, # Check every 60 seconds (when not deferred)
+        poke_interval=1, # Check every 60 seconds (when not deferred)
         # Optional: Exponential backoff for retries if needed
         # exponential_backoff=True,
     )
