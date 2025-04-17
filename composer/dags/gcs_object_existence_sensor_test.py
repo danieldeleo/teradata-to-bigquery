@@ -44,8 +44,7 @@ with DAG(
     delete_trigger_file = GCSDeleteObjectsOperator(
         task_id="delete_trigger_file",
         bucket_name=GCS_BUCKET,
-        objects=["trigger.txt"],
-        prefix="airflowsensortest/",
+        objects=[GCS_OBJECT],
     )
 
     # Task 3: Downstream task that runs after the file is detected
