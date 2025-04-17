@@ -38,7 +38,7 @@ with DAG(
         bucket=GCS_BUCKET,
         object=GCS_OBJECT,
         deferrable=True,
-        poke_interval=1,
+        poke_interval=300,  # Check every 5 minutes
     )
 
     delete_trigger_file = GCSDeleteObjectsOperator(
