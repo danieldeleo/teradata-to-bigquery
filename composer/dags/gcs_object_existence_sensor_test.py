@@ -6,6 +6,7 @@ import pendulum
 from airflow.models.dag import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.providers.google.cloud.sensors.gcs import GCSObjectExistenceSensor
+from airflow.providers.google.cloud.operators.gcs import GCSDeleteObjectsOperator
 
 # Define the GCS bucket and object (file) to check for
 GCS_BUCKET = "dannybq"  # <--- CHANGE THIS to your bucket name
@@ -45,8 +46,16 @@ with DAG(
         # exponential_backoff=True,
     )
 
+    delete_trigger_file = GCSDeleteObjectsOperator(
+        task_id="delete_trigger_file",
+        bucket=GCS_BUCKET,
+        objects=[GCS_OBJECT],
+        # Optional: Set to True to delete the file even if it doesn't exist
+        ignore_if_missing=True,
+    )
+
     # Task 3: Downstream task that runs after the file is detected
     processing_complete = EmptyOperator(task_id="processing_complete")
 
     # Define task dependencies
-    start >> wait_for_gcs_file >> processing_complete
+    start >> wait_for_gcs_file >> delete_trigger_file >> processing_complete
