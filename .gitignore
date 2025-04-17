@@ -100,3 +100,5 @@ profile.json
 # IDE
 .idea
 .vscode
+
+trigger.txt
