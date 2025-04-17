@@ -48,10 +48,8 @@ with DAG(
 
     delete_trigger_file = GCSDeleteObjectsOperator(
         task_id="delete_trigger_file",
-        bucket=GCS_BUCKET,
+        bucket_name=GCS_BUCKET,
         objects=[GCS_OBJECT],
-        # Optional: Set to True to delete the file even if it doesn't exist
-        ignore_if_missing=True,
     )
 
     # Task 3: Downstream task that runs after the file is detected
