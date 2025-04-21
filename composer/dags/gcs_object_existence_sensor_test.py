@@ -23,7 +23,7 @@ default_args = {
 with DAG(
     dag_id="gcs_object_existence_sensor_test",
     start_date=pendulum.datetime(2025, 4, 21, tz="America/New_York"), # Adjust start date as needed
-    schedule="*/1 13 * * *", # Can be set to a schedule string like "@daily" or None for manual runs
+    schedule="*/1 14 * * *", # Can be set to a schedule string like "@daily" or None for manual runs
     catchup=False,
     max_active_runs=1,
     default_args=default_args,
