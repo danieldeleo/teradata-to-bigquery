@@ -22,9 +22,10 @@ default_args = {
 # Define the DAG
 with DAG(
     dag_id="gcs_object_existence_sensor_test",
-    start_date=pendulum.datetime(2025, 1, 1, tz="UTC"), # Adjust start date as needed
-    schedule=None, # Can be set to a schedule string like "@daily" or None for manual runs
+    start_date=pendulum.datetime(2025, 1, 1, tz="America/New_York"), # Adjust start date as needed
+    schedule="*/10 * * * *", # Can be set to a schedule string like "@daily" or None for manual runs
     catchup=False,
+    max_active_runs=1,
     default_args=default_args,
     tags=["gcs", "sensor", "deferrable", "example"],
     description="Example DAG using GCSObjectExistenceSensor in deferrable mode.",
