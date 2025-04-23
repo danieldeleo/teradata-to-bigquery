@@ -21,4 +21,4 @@ steps:
     script: |
       #!/usr/bin/env bash
       set -eo pipefail  # Enable exit-on-error mode
-      gcloud storage cp composer/dags/*.py gs://us-central1-small-two-seven-27764af9-bucket/dags
+      gcloud storage cp composer/dags/*.py gs://us-central1-small-nine-thre-6d293a42-bucket/dags
