@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 from airflow.models import DagBag
+from pendulum.tz.timezone import Timezone
 
 
 @pytest.fixture(scope="session")
@@ -42,5 +43,4 @@ def test_custom_task_group_example(dagbag):
 
 def test_timezone_aware_dag(dagbag):
     dag = dagbag.get_dag("gcs_object_existence_sensor_test")
-    print(f"dag.timezone: {dag.timezone}")
-    assert dag.timezone == "America/New_York", "DAG timezone should not be UTC."
+    assert dag.timezone == Timezone("America/New_York"), "DAG timezone should be America/New_York."
