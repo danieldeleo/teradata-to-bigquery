@@ -39,3 +39,7 @@ def test_custom_task_group_example(dagbag):
     dag = dagbag.get_dag("custom_task_group_example")
     assert dag is not None, "DAG custom_task_group_example not found."
     assert len(dag.tasks) == 4, "DAG custom_task_group_example should contain 4 tasks."
+
+def test_dag_timezone(dagbag):
+    dag = dagbag.get_dag("gcs_object_existence_sensor_test")
+    assert dag.timezone != "UTC", "DAG timezone should not be UTC."
