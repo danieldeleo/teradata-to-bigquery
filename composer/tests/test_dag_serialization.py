@@ -43,4 +43,5 @@ def test_custom_task_group_example(dagbag):
 
 def test_timezone_aware_dag(dagbag):
     dag = dagbag.get_dag("gcs_object_existence_sensor_test")
+    print(f"Timezone for DAG: {dag.timezone}")
     assert dag.timezone == Timezone("America/New_York"), "DAG timezone should be America/New_York."
