@@ -15,8 +15,8 @@ def dagbag():
 def test_dagbag_not_empty(dagbag):
     assert dagbag.size() > 0, "Dagbag should not be empty."
 
-# def test_dagbag_no_import_errors(dagbag):
-#     assert dagbag.import_errors == {}, "No import errors should be found."
+def test_dagbag_no_import_errors(dagbag):
+    assert dagbag.import_errors == {}, "No import errors should be found."
 
 ''' Uncomment below if you want to fail on warnings
 def test_dagbag_no_import_warnings(dagbag):
@@ -43,5 +43,4 @@ def test_custom_task_group_example(dagbag):
 
 def test_timezone_aware_dag(dagbag):
     dag = dagbag.get_dag("gcs_object_existence_sensor_test")
-    print(f"Timezone for DAG: {dag.timezone}")
     assert dag.timezone == Timezone("America/New_York"), "DAG timezone should be America/New_York."
