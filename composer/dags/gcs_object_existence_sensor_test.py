@@ -8,6 +8,8 @@ from airflow.operators.empty import EmptyOperator
 from airflow.providers.google.cloud.sensors.gcs import GCSObjectExistenceSensor
 from airflow.providers.google.cloud.operators.gcs import GCSDeleteObjectsOperator
 
+from myimports import my_custom_module  # Import your custom module if needed
+
 # Define the GCS bucket and object (file) to check for
 GCS_BUCKET = "dannybq"  # <--- CHANGE THIS to your bucket name
 GCS_OBJECT = "airflowsensortest/trigger.txt" # <--- CHANGE THIS to the object path you expect
