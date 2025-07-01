@@ -19,7 +19,7 @@ with models.DAG(
 ) as dag:
     @task
     def get_sleepy_minutes():
-        return [1,2,3,4,5]]
+        return [1,2,3,4,5]
 
     @task_group
     def sleep_for(minutes):
