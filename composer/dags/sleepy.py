@@ -4,11 +4,11 @@ import datetime
 
 import airflow
 from airflow import models
+from airflow.decorators import dag, task
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from kubernetes.client import models as k8s
 
-with models.DAG(
-    dag_id="sleepy",
+@dag(
     schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
     max_active_tasks=100,
@@ -16,7 +16,8 @@ with models.DAG(
         "retries": 10,
         "retry_delay": datetime.timedelta(seconds=10),
     },
-) as dag:
+)
+def sleepy():
     @task
     def get_sleepy_minutes():
         return [1,2,3,4,5]
