@@ -30,7 +30,7 @@ def sleepy():
                 rf"""
                 set -e && \
                 echo "Try number: $AIRFLOW_RETRY_NUMBER" && \
-                echo "Sleeping for 5 minutes" && \
+                echo "Sleeping for {minutes} minutes" && \
                 sleep {minutes}m
                 """,
             ]
