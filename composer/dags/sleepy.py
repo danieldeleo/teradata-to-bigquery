@@ -61,3 +61,6 @@ def sleepy():
             startup_timeout_seconds=600,
         )
     sleep_for.expand(minutes=get_sleepy_minutes())
+
+# Instantiate the DAG
+sleepy()
