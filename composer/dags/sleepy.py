@@ -18,9 +18,8 @@ with models.DAG(
     },
 ) as dag:
     @task
-    def get_tables_to_export():
-        audit_logging()
-        return TABLES_TO_EXPORT
+    def get_sleepy_minutes():
+        return [1,2,3,4,5]]
 
     @task_group
     def sleep_for(minutes):
@@ -61,3 +60,4 @@ with models.DAG(
             # Increase pod startup timeout to 10 minutes
             startup_timeout_seconds=600,
         )
+    sleep_for.expand(minutes=get_sleepy_minutes())
