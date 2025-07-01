@@ -38,7 +38,7 @@ def sleepy():
 
         kpo_args = create_kpo_args(minutes)
         tpt = KubernetesPodOperator(
-            task_id=task_id,
+            task_id="sleepy_pod",
             name="sleepy",
             cmds=["bash"],
             arguments=kpo_args["arguments"],
