@@ -17,21 +17,32 @@ with models.DAG(
         "retry_delay": datetime.timedelta(seconds=10),
     },
 ) as dag:
-    for x in range(10):
-        task_id = f"sleep{x}"
-        tpt = KubernetesPodOperator(
-            task_id=task_id,
-            name="sleepy",
-            cmds=["bash"],
-            arguments=[
+    @task
+    def get_tables_to_export():
+        audit_logging()
+        return TABLES_TO_EXPORT
+
+    @task_group
+    def sleep_for(minutes):
+        @task(multiple_outputs=True)
+        def create_kpo_args(minutes):
+            arguments = [
                 "-c",
                 rf"""
                 set -e && \
                 echo "Try number: $AIRFLOW_RETRY_NUMBER" && \
                 echo "Sleeping for 5 minutes" && \
-                sleep 5m
+                sleep {minutes}m
                 """,
-            ],
+            ]
+            return {"arguments": arguments}
+
+        kpo_args = create_kpo_args(minutes)
+        tpt = KubernetesPodOperator(
+            task_id=task_id,
+            name="sleepy",
+            cmds=["bash"],
+            arguments=kpo_args["arguments"],
             env_vars={"AIRFLOW_RETRY_NUMBER": "{{ task_instance.try_number }}"},
             namespace="composer-user-workloads",
             image="teradata/tpt:latest",
