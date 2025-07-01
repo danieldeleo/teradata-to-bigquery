@@ -33,7 +33,7 @@ def test_filename_matches_dag_id(dagbag):
 def test_sleepy_dag(dagbag):
     dag = dagbag.get_dag("sleepy")
     assert dag is not None, "DAG sleepy not found."
-    assert len(dag.tasks) == 10, "DAG sleepy should contain 10 tasks."
+    assert len(dag.tasks) == 3, "DAG sleepy should contain 3 tasks."
 
 
 def test_custom_task_group_example(dagbag):
