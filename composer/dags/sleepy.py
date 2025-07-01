@@ -3,7 +3,7 @@
 import datetime
 
 import airflow
-from airflow.decorators import dag, task
+from airflow.decorators import dag, task, task_group
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from kubernetes.client import models as k8s
 
