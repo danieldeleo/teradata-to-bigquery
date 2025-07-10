@@ -1,5 +1,5 @@
 from airflow.decorators import dag
-from custom_task_group_class import CustomSequentialTaskGroup
+from custom_sequential_task_group_class import CustomSequentialTaskGroup
 
 
 @dag(schedule=None, catchup=False)
