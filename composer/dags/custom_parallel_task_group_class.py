@@ -1,12 +1,9 @@
-from time import sleep
-
 from airflow import models
 from airflow.decorators import task, task_group
-from airflow.exceptions import AirflowFailException
 from airflow.utils.task_group import TaskGroup
 
 
-class CustomTaskGroup(TaskGroup):
+class CustomParallelTaskGroup(TaskGroup):
     def __init__(self, group_id, files=["file1"], **kwargs):
         super().__init__(group_id=group_id, **kwargs)
 
@@ -26,12 +23,12 @@ class CustomTaskGroup(TaskGroup):
 
         @task_group(parent_group=self)
         def sequential_task_group(file):
-            @task(max_active_tis_per_dag=1)
+            @task
             def task_1(file, ti):
                 print(f"task_1: {file=}")
                 return file
 
-            @task(max_active_tis_per_dag=1)
+            @task
             def task_2(file):
                 print(f"task_2: {file=}")
 
