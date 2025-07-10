@@ -9,4 +9,4 @@ def custom_task_group_example():
     )
 
 
-custom_sequential_task_group_example()
+custom_task_group_example()
