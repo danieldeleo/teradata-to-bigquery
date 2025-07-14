@@ -27,6 +27,6 @@ def circular_conf_achilles_heel():
     end = EmptyOperator(task_id="end")
 
     # Define task dependencies
-    start >> create_circular_conf >> end
+    end(circular_conf_achilles_heel(start))
 
 circular_conf_achilles_heel()
