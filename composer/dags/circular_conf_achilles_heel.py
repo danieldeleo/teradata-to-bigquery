@@ -14,6 +14,9 @@ with DAG(
         schedule=None,
         catchup=False,
         max_active_runs=1,
+        default_args={
+            "retries": 0
+        },
         description="Example of a DAG which can cause Airflow Scheduler to endlessly restart itself, rendering Composer inoperable.",
     ) as dag:
 
@@ -40,7 +43,7 @@ with DAG(
         return params
     
     def _create_circular_conf(**context):
-        params = {"steps":[{"name":"middle", "type":"middle"}]}
+        params = {"steps":[{"name":"middle", "type":"middle", "params":{}}]}
         params = checkDynamicParams(context, params, "middle")
         params['steps']['another_key'] = params['steps']
 
