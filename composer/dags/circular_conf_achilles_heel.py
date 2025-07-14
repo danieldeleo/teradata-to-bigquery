@@ -28,3 +28,5 @@ def circular_conf_achilles_heel():
 
     # Define task dependencies
     start >> create_circular_conf >> end
+
+circular_conf_achilles_heel()
