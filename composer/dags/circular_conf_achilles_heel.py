@@ -12,8 +12,7 @@ from airflow.operators.empty import EmptyOperator
     schedule=None,
     catchup=False,
     max_active_runs=1,
-    tags=["gcs", "sensor", "deferrable", "example"],
-    description="Example DAG using GCSObjectExistenceSensor in deferrable mode.",
+    description="Example of a DAG which can cause Airflow Scheduler to endlessly restart itself, rendering Composer inoperable.",
 )
 def circular_conf_achilles_heel():
     # Start task (optional, good practice)
