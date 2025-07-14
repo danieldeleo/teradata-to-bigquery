@@ -12,7 +12,6 @@ from airflow.operators.empty import EmptyOperator
     schedule=None,
     catchup=False,
     max_active_runs=1,
-    default_args=default_args,
     tags=["gcs", "sensor", "deferrable", "example"],
     description="Example DAG using GCSObjectExistenceSensor in deferrable mode.",
 )
