@@ -1,32 +1,33 @@
 # Import necessary libraries
 from __future__ import annotations
 
-from airflow.decorators import dag, task
+from airflow.models.dag import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.empty import EmptyOperator
+from airflow.providers.standard.operators.python import PythonOperator
 
 
 # Define the DAG
-@dag(
-    start_date=days_ago(1),
-    schedule=None,
-    catchup=False,
-    max_active_runs=1,
-    description="Example of a DAG which can cause Airflow Scheduler to endlessly restart itself, rendering Composer inoperable.",
-)
-def circular_conf_achilles_heel():
-    # Start task (optional, good practice)
-    start = EmptyOperator(task_id="start")
+dag = DAG(
+        dag_id="circular_conf_achilles_heel",
+        start_date=days_ago(1),
+        schedule=None,
+        catchup=False,
+        max_active_runs=1,
+        description="Example of a DAG which can cause Airflow Scheduler to endlessly restart itself, rendering Composer inoperable.",
+    )
 
-    @task
-    def create_circular_conf(**context):
-        params = {'some_key': {}}
-        params['some_key']['another_key'] = params['some_key']
+# Start task (optional, good practice)
+start = EmptyOperator(task_id="start", dag=dag)
 
-    # End task (optional, good practice)
-    end = EmptyOperator(task_id="end")
+def _create_circular_conf(**context):
+    params = {'some_key': {}}
+    params['some_key']['another_key'] = params['some_key']
 
-    # Define task dependencies
-    end(circular_conf_achilles_heel(start))
+create_circular_conf = PythonOperator(task_id="create_circular_conf", python_callable=_create_circular_conf)
 
-circular_conf_achilles_heel()
+# End task (optional, good practice)
+end = EmptyOperator(task_id="end", dag=dag)
+
+# Define task dependencies
+start >> create_circular_conf >> end
