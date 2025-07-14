@@ -4,7 +4,7 @@ from __future__ import annotations
 from airflow.models.dag import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.empty import EmptyOperator
-from airflow.providers.standard.operators.python import PythonOperator
+from airflow.operators.python_operator import PythonOperator
 
 
 # Define the DAG
