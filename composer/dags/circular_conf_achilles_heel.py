@@ -26,8 +26,11 @@ with DAG(
     # Start task (optional, good practice)
     start = EmptyOperator(task_id="start", dag=dag)
     
-    def _create_circular_conf(**context):
+    def add_circular_conf_to_dag(context):
         context['dag_run'].conf['steps'] = context['dag_run'].conf
+
+    def _create_circular_conf(**context):
+        add_circular_conf_to_dag(context)
 
     def _downstream_task(**context):
         print('hello')
