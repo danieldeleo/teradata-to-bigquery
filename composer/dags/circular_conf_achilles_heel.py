@@ -32,7 +32,7 @@ with DAG(
                 if task['name'].lower() != 'start' and task['name'].lower() != 'end':
                     if task['type'].lower() == taskType :
                         params = task['params']
-                        # print("updated params:", params)
+                        print("updated params:", params)
                         break          
                 else:
                     print("no dynamic config passed for this task while triggering, proceeding with user metadata..")
@@ -43,9 +43,8 @@ with DAG(
         return params
     
     def _create_circular_conf(**context):
-        params = {"steps":[{"name":"middle", "type":"middle", "params":{"steps":{}}}]}
+        params = {"steps":{}}
         params = checkDynamicParams(context, params, "middle")
-        print(f"{params=}")
         params['steps']['another_key'] = params['steps']
 
     create_circular_conf = PythonOperator(task_id="create_circular_conf", python_callable=_create_circular_conf)
