@@ -7,7 +7,8 @@ from airflow.operators.empty import EmptyOperator
 from airflow.operators.python_operator import PythonOperator
 
 
-# Define the DAG
+# Trigger this DAG with the following dynamic config:
+# {"steps":[{"name":"middle", "type":"middle", "params":{}}]}
 with DAG(
         dag_id="circular_conf_achilles_heel",
         start_date=days_ago(1),
