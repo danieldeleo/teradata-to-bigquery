@@ -24,13 +24,10 @@ with DAG(
     ) as dag:
 
     # Start task (optional, good practice)
-    start = EmptyOperator(task_id="start", dag=dag)
-    
-    def add_circular_conf_to_dag(context):
-        context['dag_run'].conf['steps'] = context['dag_run'].conf
+    start = EmptyOperator(task_id="start", dag=dag)    
 
     def _create_circular_conf(**context):
-        add_circular_conf_to_dag(context)
+        context['dag_run'].conf['steps'] = context['dag_run'].conf
 
     def _downstream_task(**context):
         print('hello')
@@ -43,4 +40,5 @@ with DAG(
     end = EmptyOperator(task_id="end", dag=dag)
 
     # Define task dependencies
-    start >> create_circular_conf >> downstream_task >> end
+    # start >> create_circular_conf >> downstream_task >> end
+    start >> create_circular_conf >> end
