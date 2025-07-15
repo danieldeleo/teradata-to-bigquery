@@ -4,7 +4,8 @@ from __future__ import annotations
 from airflow.models.dag import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.empty import EmptyOperator
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import PythonOperator # type: ignore
+import json
 
 
 # Trigger this DAG with the following dynamic config:
@@ -46,7 +47,8 @@ with DAG(
     def _create_circular_conf(**context):
         params = {"steps":{}}
         params = checkDynamicParams(context, params, "middle")
-        params['steps']['another_key'] = params['steps']
+        print(json.dumps(params, indent=4))
+        # params['steps']['another_key'] = params['steps']
 
     create_circular_conf = PythonOperator(task_id="create_circular_conf", python_callable=_create_circular_conf)
 
