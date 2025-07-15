@@ -50,7 +50,7 @@ with DAG(
         params = {"steps":{}}
         params = checkDynamicParams(context, params, "middle")
         print(json.dumps(params, indent=4))
-        # params['steps']['another_key'] = params['steps']
+        params['steps']['another_key'] = params['steps']
 
     def _downstream_task(**context):
         params = {"steps":{}}
