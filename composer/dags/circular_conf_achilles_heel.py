@@ -46,6 +46,7 @@ with DAG(
         return params
     
     def _create_circular_conf(**context):
+        params=None
         print(f"{context['dag_run'].conf=}")
         params = checkDynamicParams(context, params, "middle")
         print(f"{context['dag_run'].conf=}")
