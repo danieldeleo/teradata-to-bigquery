@@ -52,10 +52,18 @@ with DAG(
         print(json.dumps(params, indent=4))
         # params['steps']['another_key'] = params['steps']
 
+    def _downstream_task(**context):
+        params = {"steps":{}}
+        params = checkDynamicParams(context, params, "middle")
+        print(json.dumps(params, indent=4))
+        # params['steps']['another_key'] = params['steps']
+
     create_circular_conf = PythonOperator(task_id="create_circular_conf", python_callable=_create_circular_conf)
+
+    downstream_task = PythonOperator(task_id="downstream_task", python_callable=_downstream_task)
 
     # End task (optional, good practice)
     end = EmptyOperator(task_id="end", dag=dag)
 
     # Define task dependencies
-    start >> create_circular_conf >> end
+    start >> create_circular_conf >> downstream_task >> end
