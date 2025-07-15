@@ -27,9 +27,10 @@ with DAG(
     
     def checkDynamicParams(context, params, taskType):
         dynamic_config = context['dag_run'].con
-        json.dumps(dynamic_config, indent=4)  
+        json.dumps(dynamic_config, indent=4)
         if dynamic_config != {}:
             dynamic_config = {k.lower(): v for k, v in dynamic_config.items()}
+            json.dumps(dynamic_config, indent=4)
             for task in dynamic_config['steps']:
                 task = {k.lower(): v for k, v in task.items()}
                 if task['name'].lower() != 'start' and task['name'].lower() != 'end':
