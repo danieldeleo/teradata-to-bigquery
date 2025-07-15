@@ -50,7 +50,7 @@ with DAG(
         print(f"{context['dag_run'].conf=}")
         params = checkDynamicParams(context, params, "middle")
         print(f"{context['dag_run'].conf=}")
-        params['steps']['another_key'] = params['steps']
+        # params['steps']['another_key'] = params['steps']
 
     def _downstream_task(**context):
         print('hello')
