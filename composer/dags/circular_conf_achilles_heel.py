@@ -47,9 +47,8 @@ with DAG(
     
     def _create_circular_conf(**context):
         params=None
-        print(f"{context['dag_run'].conf=}")
         params = checkDynamicParams(context, params, "middle")
-        print(f"{context['dag_run'].conf=}")
+        print(f"params is context?: {params is context['dag_run'].conf['steps'][0]['params']}")
         # params['steps']['another_key'] = params['steps']
 
     def _downstream_task(**context):
