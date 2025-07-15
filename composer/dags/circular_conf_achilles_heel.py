@@ -45,6 +45,7 @@ with DAG(
     def _create_circular_conf(**context):
         params = {"steps":[{"name":"middle", "type":"middle", "params":{}}]}
         params = checkDynamicParams(context, params, "middle")
+        print(f"{params=}")
         params['steps']['another_key'] = params['steps']
 
     create_circular_conf = PythonOperator(task_id="create_circular_conf", python_callable=_create_circular_conf)
