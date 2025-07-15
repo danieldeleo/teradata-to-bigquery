@@ -27,10 +27,8 @@ with DAG(
     
     def checkDynamicParams(context, params, taskType):
         dynamic_config = context['dag_run'].conf
-        print(json.dumps(dynamic_config, indent=4))
         if dynamic_config != {}:
             dynamic_config = {k.lower(): v for k, v in dynamic_config.items()}
-            print(json.dumps(dynamic_config, indent=4))
             for task in dynamic_config['steps']:
                 task = {k.lower(): v for k, v in task.items()}
                 if task['name'].lower() != 'start' and task['name'].lower() != 'end':
@@ -47,8 +45,8 @@ with DAG(
         return params
     
     def _create_circular_conf(**context):
-        params = {"steps":{}}
-        # params = checkDynamicParams(context, params, "middle")
+        params = None
+        params = checkDynamicParams(context, params, "middle")
         # print(json.dumps(params, indent=4))
         params['steps']['another_key'] = params['steps']
 
