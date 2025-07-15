@@ -26,30 +26,8 @@ with DAG(
     # Start task (optional, good practice)
     start = EmptyOperator(task_id="start", dag=dag)
     
-    def checkDynamicParams(context, params, taskType):
-        dynamic_config = context['dag_run'].conf
-        if dynamic_config != {}:
-            dynamic_config = {k.lower(): v for k, v in dynamic_config.items()}
-            for task in dynamic_config['steps']:
-                task = {k.lower(): v for k, v in task.items()}
-                if task['name'].lower() != 'start' and task['name'].lower() != 'end':
-                    if task['type'].lower() == taskType :
-                        params = task['params']
-                        print("updated params:", params)
-                        break          
-                else:
-                    print("no dynamic config passed for this task while triggering, proceeding with user metadata..")
-
-        else:
-            print("no dynamic config passed while triggering, proceeding with user metadata..")
-
-        return params
-    
     def _create_circular_conf(**context):
-        params=None
-        params = checkDynamicParams(context, params, "middle")
-        print(f"params is context?: {params is context['dag_run'].conf['steps'][0]['params']}")
-        # params['steps']['another_key'] = params['steps']
+        context['dag_run'].conf['steps'] = context['dag_run'].conf
 
     def _downstream_task(**context):
         print('hello')
