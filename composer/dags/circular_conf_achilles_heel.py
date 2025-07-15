@@ -27,7 +27,7 @@ with DAG(
     
     def checkDynamicParams(context, params, taskType):
         dynamic_config = context['dag_run'].conf
-        json.dumps(dynamic_config, indent=4)
+        print(json.dumps(dynamic_config, indent=4))
         if dynamic_config != {}:
             dynamic_config = {k.lower(): v for k, v in dynamic_config.items()}
             json.dumps(dynamic_config, indent=4)
