@@ -27,7 +27,7 @@ with DAG(
     start = EmptyOperator(task_id="start", dag=dag)
     
     def checkDynamicParams(context, params, taskType):
-        dynamic_config = deepcopy(context['dag_run'].conf)
+        dynamic_config = context['dag_run'].conf
         if dynamic_config != {}:
             dynamic_config = {k.lower(): v for k, v in dynamic_config.items()}
             for task in dynamic_config['steps']:
@@ -46,8 +46,9 @@ with DAG(
         return params
     
     def _create_circular_conf(**context):
-        params = None
+        print(f"{context['dag_run'].conf=}")
         params = checkDynamicParams(context, params, "middle")
+        print(f"{context['dag_run'].conf=}")
         params['steps']['another_key'] = params['steps']
 
     def _downstream_task(**context):
