@@ -43,7 +43,7 @@ with DAG(
         return params
     
     def _create_circular_conf(**context):
-        params = {"steps":[{"name":"middle", "type":"middle", "params":{}}]}
+        params = {"steps":[{"name":"middle", "type":"middle", "params":{"steps":{}}}]}
         params = checkDynamicParams(context, params, "middle")
         print(f"{params=}")
         params['steps']['another_key'] = params['steps']
