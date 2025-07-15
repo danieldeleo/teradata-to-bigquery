@@ -26,7 +26,8 @@ with DAG(
     start = EmptyOperator(task_id="start", dag=dag)
     
     def checkDynamicParams(context, params, taskType):
-        dynamic_config = context['dag_run'].conf  
+        dynamic_config = context['dag_run'].con
+        json.dumps(dynamic_config, indent=4)  
         if dynamic_config != {}:
             dynamic_config = {k.lower(): v for k, v in dynamic_config.items()}
             for task in dynamic_config['steps']:
