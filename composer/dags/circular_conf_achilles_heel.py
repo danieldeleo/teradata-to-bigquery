@@ -14,7 +14,7 @@ with DAG(
     description="Example of a DAG which can cause Airflow Scheduler to endlessly restart itself, rendering Composer inoperable.",
 ) as dag:
 
-    start = EmptyOperator(task_id="start", dag=dag)
+    start = EmptyOperator(task_id="start")
 
     def _create_circular_conf(**context):
         context["dag_run"].conf["steps"] = context["dag_run"].conf
@@ -30,8 +30,7 @@ with DAG(
         task_id="downstream_task", python_callable=_downstream_task
     )
 
-    # End task (optional, good practice)
-    end = EmptyOperator(task_id="end", dag=dag)
+    end = EmptyOperator(task_id="end")
 
     # Define task dependencies
     start >> create_circular_conf >> downstream_task >> end
