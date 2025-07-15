@@ -48,15 +48,12 @@ with DAG(
     
     def _create_circular_conf(**context):
         params = {"steps":{}}
-        params = checkDynamicParams(context, params, "middle")
-        print(json.dumps(params, indent=4))
+        # params = checkDynamicParams(context, params, "middle")
+        # print(json.dumps(params, indent=4))
         params['steps']['another_key'] = params['steps']
 
     def _downstream_task(**context):
-        params = {"steps":{}}
-        params = checkDynamicParams(context, params, "middle")
-        print(json.dumps(params, indent=4))
-        # params['steps']['another_key'] = params['steps']
+        print('hello')
 
     create_circular_conf = PythonOperator(task_id="create_circular_conf", python_callable=_create_circular_conf)
 
