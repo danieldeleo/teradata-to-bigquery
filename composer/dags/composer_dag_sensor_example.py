@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import pendulum
 
 from airflow.models.dag import DAG
 from airflow.operators.empty import EmptyOperator
-from airflow.providers.google.cloud.sensors.composer import CloudComposerDagRunSensor
+from airflow.providers.google.cloud.sensors.cloud_composer import CloudComposerDAGRunSensor
+from airflow.utils.dates import days_ago
 
 
 # --- CONFIGURATION ---
@@ -20,7 +20,7 @@ TARGET_DAG_ID = "dag_triggerer"
 
 with DAG(
     dag_id="composer_dag_sensor_example",
-    start_date=pendulum.datetime(2023, 1, 1, tz="UTC"),  # Use a specific date
+    start_date=days_ago(1),
     schedule=None,
     catchup=False,
     max_active_runs=1,
