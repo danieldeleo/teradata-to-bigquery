@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import pendulum
+
 from airflow.models.dag import DAG
 from airflow.operators.empty import EmptyOperator
-from airflow.providers.google.cloud.sensors.cloud_composer import CloudComposerDAGRunSensor
-from airflow.utils.dates import days_ago
+from airflow.providers.google.cloud.sensors.composer import CloudComposerDagRunSensor
 
 
 # --- CONFIGURATION ---
@@ -19,7 +20,7 @@ TARGET_DAG_ID = "dag_triggerer"
 
 with DAG(
     dag_id="composer_dag_sensor_example",
-    start_date=days_ago(1),
+    start_date=pendulum.datetime(2023, 1, 1, tz="UTC"),  # Use a specific date
     schedule=None,
     catchup=False,
     max_active_runs=1,
@@ -29,15 +30,14 @@ with DAG(
     # This sensor waits for a DAG run to complete in a Cloud Composer environment.
     # It polls the environments.list and environments.get APIs, then checks the Airflow REST API
     # of the target environment for the status of the DAG run.
-    wait_for_another_dag = CloudComposerDAGRunSensor(
+    wait_for_another_dag = CloudComposerDagRunSensor(
         task_id="wait_for_another_dag",
         project_id=GCP_PROJECT_ID,
         region=COMPOSER_REGION,
-        composer_environment=COMPOSER_ENVIRONMENT_NAME,
-        target_dag_id=TARGET_DAG_ID,
-        allowed_states=["success"],  # The state(s) to wait for.
+        environment_id=COMPOSER_ENVIRONMENT_NAME,
+        composer_dag_id=TARGET_DAG_ID,
         deferrable=True,
-    )
+    )  
 
     # An empty operator to run after the sensor succeeds, representing a downstream task.
     all_done = EmptyOperator(task_id="all_done")
