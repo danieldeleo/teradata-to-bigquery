@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from airflow.models.dag import DAG
 from airflow.operators.empty import EmptyOperator
-from airflow.providers.google.cloud.sensors.composer import CloudComposerDagSensor
+from airflow.providers.google.cloud.sensors.cloud_composer import CloudComposerDagSensor
 from airflow.utils.dates import days_ago
 
 
