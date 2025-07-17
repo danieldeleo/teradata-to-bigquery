@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from airflow.models.dag import DAG
 from airflow.operators.empty import EmptyOperator
-from airflow.providers.google.cloud.sensors.cloud_composer import CloudComposerDagSensor
+from airflow.providers.google.cloud.sensors.cloud_composer import CloudComposerDAGRunSensor
 from airflow.utils.dates import days_ago
 
 
@@ -29,7 +29,7 @@ with DAG(
     # This sensor waits for a DAG run to complete in a Cloud Composer environment.
     # It polls the environments.list and environments.get APIs, then checks the Airflow REST API
     # of the target environment for the status of the DAG run.
-    wait_for_another_dag = CloudComposerDagSensor(
+    wait_for_another_dag = CloudComposerDAGRunSensor(
         task_id="wait_for_another_dag",
         project_id=GCP_PROJECT_ID,
         region=COMPOSER_REGION,
