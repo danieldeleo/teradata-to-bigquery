@@ -6,6 +6,7 @@ from airflow.operators.empty import EmptyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.google.cloud.sensors.cloud_composer import CloudComposerDAGRunSensor
 from airflow.utils.dates import days_ago
+from time import sleep
 
 
 # --- CONFIGURATION ---
@@ -18,6 +19,7 @@ COMPOSER_ENVIRONMENT_NAME = "small"
 # This example waits for the `gcs_object_existence_sensor_test` DAG.
 TARGET_DAG_ID = "dag_triggerer"
 # --- END CONFIGURATION ---
+sleep(5)
 
 with DAG(
     dag_id="composer_dag_sensor_example",
