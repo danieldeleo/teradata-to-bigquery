@@ -4031,7 +4031,7 @@ with DAG(
     def _downstream_task(**context):
         print("Help!")
 
-        downstream_task_1 = PythonOperator(
+    downstream_task_1 = PythonOperator(
         task_id="downstream_task_1", python_callable=_downstream_task
     )
     downstream_task_2 = PythonOperator(
