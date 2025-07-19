@@ -38,8 +38,17 @@ with DAG(
     @task_group
     def sleepy_task_group(seconds_of_sleep):    
         @task
-        def sleepy_task(seconds_of_sleep):
-            return sleep(seconds_of_sleep)
-        sleepy_task(seconds_of_sleep)
+        def sleepy_task_1(seconds_of_sleep):
+            sleep(seconds_of_sleep)
+            return seconds_of_sleep
+        @task
+        def sleepy_task_2(seconds_of_sleep):
+            sleep(seconds_of_sleep)
+            return seconds_of_sleep
+        @task
+        def sleepy_task_3(seconds_of_sleep):
+            sleep(seconds_of_sleep)
+            return seconds_of_sleep
+        sleepy_task_3(sleepy_task_2(sleepy_task_1(seconds_of_sleep)))
     sleepy_task_group.expand(seconds_of_sleep=get_num_sleepy_tasks())
     
