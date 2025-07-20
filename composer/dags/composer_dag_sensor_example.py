@@ -19,7 +19,6 @@ COMPOSER_ENVIRONMENT_NAME = "small"
 # This example waits for the `gcs_object_existence_sensor_test` DAG.
 TARGET_DAG_ID = "dag_triggerer"
 # --- END CONFIGURATION ---
-sleep(10)
 
 with DAG(
     dag_id="composer_dag_sensor_example",
