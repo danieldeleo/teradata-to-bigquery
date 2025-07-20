@@ -33,7 +33,7 @@ with DAG(
     @task
     def get_num_sleepy_tasks():
         seconds_of_sleep = 5
-        return [seconds_of_sleep] * 500
+        return [seconds_of_sleep] * 1500
     
     @task_group
     def sleepy_task_group(seconds_of_sleep):    
