@@ -37,7 +37,7 @@ with DAG(
     @task_group
     def sleepy_task_group(seconds_of_sleep):
         sensor = CloudComposerDAGRunSensor(
-            task_id="wait_for_another_dag_{{ ti.map_index }}",
+            task_id="wait_for_another_dag",
             project_id=GCP_PROJECT_ID,
             region=COMPOSER_REGION,
             environment_id=COMPOSER_ENVIRONMENT_NAME,
