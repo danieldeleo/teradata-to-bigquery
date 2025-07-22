@@ -7,10 +7,9 @@ def custom_parallel_task_group_example():
     @task
     def get_files():
         return ["file1", "file2", "file3", "file4", "file5"]
-    ctg = CustomParallelTaskGroup(
+    CustomParallelTaskGroup.partial(
         group_id="my_custom_task_group"
-    )
-    ctg.expand(files=get_files())
+    ).expand(files=get_files())
 
 
 custom_parallel_task_group_example()
