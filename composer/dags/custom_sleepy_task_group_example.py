@@ -17,11 +17,11 @@ def custom_sleepy_task_group_example():
         )
         sleep2 = CustomSleepyTaskGroup(
             group_id="my_custom_sleepy_task_group_2",
-            seconds=sleep1
+            seconds=sleep1.output
         )
         sleep3 = CustomSleepyTaskGroup(
             group_id="my_custom_sleepy_task_group_3",
-            seconds=sleep2
+            seconds=sleep2.output
         )
         return sleep3.output
 
