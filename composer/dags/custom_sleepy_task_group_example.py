@@ -9,9 +9,9 @@ def custom_sleepy_task_group_example():
     
     @task_group
     def sleepy_task_group(seconds):
-        sleep1 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group", seconds=seconds)
-        sleep2 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group", seconds=sleep1)
-        sleep3 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group", seconds=sleep2)
+        sleep1 = CustomSleepyTaskGroup(group_id="my_custom_sleepy_task_group_1", seconds=seconds)
+        sleep2 = CustomSleepyTaskGroup(group_id="my_custom_sleepy_task_group_2", seconds=sleep1)
+        sleep3 = CustomSleepyTaskGroup(group_id="my_custom_sleepy_task_group_3", seconds=sleep2)
         return sleep3
     
     @task
