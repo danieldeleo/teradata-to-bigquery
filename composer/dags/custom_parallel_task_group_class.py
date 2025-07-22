@@ -4,7 +4,7 @@ from airflow.utils.task_group import TaskGroup
 
 
 class CustomParallelTaskGroup(TaskGroup):
-    def __init__(self, group_id, files=[] ** kwargs):
+    def __init__(self, group_id, files=[], **kwargs):
         super().__init__(group_id=group_id, **kwargs)
 
         @task_group(parent_group=self)
