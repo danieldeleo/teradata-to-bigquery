@@ -25,6 +25,6 @@ class CustomSleepyTaskGroup(TaskGroup):
             sleep(seconds)
             return seconds
         
-        return even_more_sleep_for(more_sleep_for(sleep_for(seconds)))
+        even_more_sleep_for(more_sleep_for(sleep_for(seconds)))
 
         

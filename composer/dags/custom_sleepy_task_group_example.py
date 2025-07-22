@@ -7,13 +7,13 @@ files = ["file1", "file2", "file3", "file4", "file5"]
 def custom_sleepy_task_group_example():
     @task
     def get_sleepy_seconds():
-        return [5,5,5,5,5]
+        return [5,4,3,2,1]
     
     @task_group
     def sleepy_task_group(seconds):
-        sleep1 = CustomSleepyTaskGroup(group_id="my_custom_sleepy_task_group", seconds=seconds)
-        sleep2 = CustomSleepyTaskGroup(group_id="my_custom_sleepy_task_group", seconds=sleep1)
-        sleep3 = CustomSleepyTaskGroup(group_id="my_custom_sleepy_task_group", seconds=sleep2)
+        sleep1 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group_sleep_for_{seconds}_sec", seconds=seconds)
+        sleep2 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group_sleep_for_{seconds}_sec", seconds=sleep1)
+        sleep3 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group_sleep_for_{seconds}_sec", seconds=sleep2)
         return sleep3
     
     @task
