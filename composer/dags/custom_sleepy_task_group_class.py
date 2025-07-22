@@ -30,4 +30,4 @@ class CustomSleepyTaskGroup(TaskGroup):
             sleep(seconds)
             return seconds
 
-        even_more_sleep_for(more_sleep_for(sleep_for(seconds)))
+        self.output = even_more_sleep_for(more_sleep_for(sleep_for(seconds)))
