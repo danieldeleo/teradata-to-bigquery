@@ -1,4 +1,4 @@
-from airflow.decorators import dag, task
+from airflow.decorators import dag, task, task_group
 from custom_sleepy_task_group_class import CustomSleepyTaskGroup
 
 files = ["file1", "file2", "file3", "file4", "file5"]
