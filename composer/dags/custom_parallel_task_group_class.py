@@ -4,7 +4,7 @@ from airflow.utils.task_group import TaskGroup
 
 
 class CustomParallelTaskGroup(TaskGroup):
-    def __init__(self, group_id, files, **kwargs):
+    def __init__(self, group_id, files=["file1"], **kwargs):
         super().__init__(group_id=group_id, **kwargs)
 
         @task_group(parent_group=self)
@@ -34,6 +34,6 @@ class CustomParallelTaskGroup(TaskGroup):
 
             task_2(task_1(file))
 
-        task_group_1_files = parallel_task_group(files)
+        task_group_1_files = parallel_task_group.expand(file=files)
         reduced_files = combine_files_before_sequential_processing(task_group_1_files)
         sequential_task_group.expand(file=reduced_files)

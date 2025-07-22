@@ -1,15 +1,12 @@
-from airflow.decorators import dag, task
+from airflow.decorators import dag
 from custom_parallel_task_group_class import CustomParallelTaskGroup
 
 
 @dag(schedule=None, catchup=False)
 def custom_parallel_task_group_example():
-    @task
-    def get_files():
-        return ["file1", "file2", "file3", "file4", "file5"]
-    CustomParallelTaskGroup.partial(
-        group_id="my_custom_task_group"
-    ).expand(files=get_files())
+    ctg = CustomParallelTaskGroup(
+        group_id="my_custom_task_group", files=["file1", "file2", "file3", "file4", "file5"]
+    )
 
 
 custom_parallel_task_group_example()
