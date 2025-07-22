@@ -24,8 +24,8 @@ def custom_sleepy_task_group_example():
 
     @task
     def done_sleeping(seconds):
-        for sec in seconds:
-            print(f"Done sleeping for {sec=}")
+        seconds = list(seconds)
+        print(f"Done sleeping for {seconds=}")
 
     out = sleepy_task_group.expand(seconds=get_sleepy_seconds())
     done_sleeping(out)
