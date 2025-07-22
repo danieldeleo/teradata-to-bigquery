@@ -21,13 +21,13 @@ TARGET_DAG_ID = "dag_triggerer"
 # --- END CONFIGURATION ---
 
 with DAG(
-    dag_id="composer_dag_sensor_example",
+    dag_id="composer_dag_sensor_bad_example",
     start_date=days_ago(1),
     schedule=None,
     catchup=False,
     max_active_runs=1,
     default_args={"retries": 0},
-    description="A DAG that demonstrates the use of CloudComposerDagSensor.",
+    description="A DAG that demonstrates how to create a slow running set of tasks.",
 ) as dag:
     def sleepy():
         sleep(5)
