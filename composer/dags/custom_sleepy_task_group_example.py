@@ -13,18 +13,18 @@ def custom_sleepy_task_group_example():
     def sleepy_task_group(seconds):
         sleep1 = CustomSleepyTaskGroup(
             group_id="my_custom_sleepy_task_group_1",
-            group_display_name=f"sleep_for_{seconds}_sec",
             seconds=seconds,
+            group_display_name=f"sleep_for_{seconds}_sec",
         )
         sleep2 = CustomSleepyTaskGroup(
             group_id="my_custom_sleepy_task_group_2",
-            group_display_name=f"sleep_for_{seconds}_sec",
             seconds=sleep1,
+            group_display_name=f"sleep_for_{seconds}_sec",
         )
         sleep3 = CustomSleepyTaskGroup(
             group_id="my_custom_sleepy_task_group_3",
-            group_display_name=f"sleep_for_{seconds}_sec",
             seconds=sleep2,
+            group_display_name=f"sleep_for_{seconds}_sec",
         )
         return sleep3
 
