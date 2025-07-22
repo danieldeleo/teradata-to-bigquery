@@ -1,4 +1,3 @@
-from airflow import models
 from airflow.decorators import task
 from airflow.utils.task_group import TaskGroup
 
