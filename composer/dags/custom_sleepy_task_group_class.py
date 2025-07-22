@@ -4,8 +4,8 @@ from airflow.utils.task_group import TaskGroup
 
 
 class CustomSleepyTaskGroup(TaskGroup):
-    def __init__(self, group_id, seconds=0, **kwargs):
-        super().__init__(group_id=group_id, **kwargs)
+    def __init__(self, group_id, group_display_name, seconds=0, **kwargs):
+        super().__init__(group_id=group_id, group_display_name=group_display_name, **kwargs)
 
         @task(task_group=self)
         def sleep_for(seconds):
