@@ -12,22 +12,20 @@ def custom_sleepy_task_group_example():
     @task_group
     def sleepy_task_group(seconds):
         sleep1 = CustomSleepyTaskGroup(
-            group_id="my_custom_sleepy_task_group_1",
-            seconds=seconds
+            group_id="my_custom_sleepy_task_group_1", seconds=seconds
         )
         sleep2 = CustomSleepyTaskGroup(
-            group_id="my_custom_sleepy_task_group_2",
-            seconds=sleep1.output
+            group_id="my_custom_sleepy_task_group_2", seconds=sleep1.output
         )
         sleep3 = CustomSleepyTaskGroup(
-            group_id="my_custom_sleepy_task_group_3",
-            seconds=sleep2.output
+            group_id="my_custom_sleepy_task_group_3", seconds=sleep2.output
         )
         return sleep3.output
 
     @task
     def done_sleeping(seconds):
-        print(f"Done sleeping for {seconds=}")
+        for sec in seconds:
+            print(f"Done sleeping for {sec=}")
 
     out = sleepy_task_group.expand(seconds=get_sleepy_seconds())
     done_sleeping(out)
