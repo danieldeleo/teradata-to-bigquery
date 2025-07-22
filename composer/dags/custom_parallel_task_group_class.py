@@ -22,7 +22,7 @@ class CustomParallelTaskGroup(TaskGroup):
             return files
 
         @task_group(parent_group=self)
-        def sequential_task_group(file):
+        def another_parallel_task_group(file):
             @task
             def task_1(file, ti):
                 print(f"task_1: {file=}")
@@ -36,4 +36,4 @@ class CustomParallelTaskGroup(TaskGroup):
 
         task_group_1_files = parallel_task_group.expand(file=files)
         reduced_files = combine_files_before_sequential_processing(task_group_1_files)
-        sequential_task_group.expand(file=reduced_files)
+        another_parallel_task_group.expand(file=reduced_files)
