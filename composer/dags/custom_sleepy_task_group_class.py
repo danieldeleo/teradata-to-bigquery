@@ -1,10 +1,10 @@
 from airflow import models
 from airflow.decorators import task, task_group
-from airflow.utils.task_group import TaskGroup, MappedTaskGroup
+from airflow.utils.task_group import TaskGroup
 
 
-class CustomSleepyTaskGroup(MappedTaskGroup):
-    def __init__(self, group_id, seconds=0,  **kwargs):
+class CustomSleepyTaskGroup(TaskGroup):
+    def __init__(self, group_id, seconds=0, **kwargs):
         super().__init__(group_id=group_id, **kwargs)
 
         @task(task_group=self)
