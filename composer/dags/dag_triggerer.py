@@ -40,5 +40,5 @@ with DAG(
         # command="dags trigger -- sleepy",
         command=f"dags trigger {TARGET_DAG_ID} --run-id {{{{ ts_nodash }}}}",
         # You can run this operator in the deferrable mode:
-        # deferrable=True
+        deferrable=True
     )
