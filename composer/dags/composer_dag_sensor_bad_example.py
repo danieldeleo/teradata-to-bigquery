@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+from time import sleep
 
 from airflow.models.dag import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python_operator import PythonOperator
-from airflow.providers.google.cloud.sensors.cloud_composer import CloudComposerDAGRunSensor
+from airflow.providers.google.cloud.sensors.cloud_composer import (
+    CloudComposerDAGRunSensor,
+)
 from airflow.utils.dates import days_ago
-from time import sleep
-
 
 # --- CONFIGURATION ---
 # TODO: Replace with your GCP Project ID, Composer Environment Region, and Composer Environment Name
@@ -29,8 +30,10 @@ with DAG(
     default_args={"retries": 0},
     description="A DAG that demonstrates how to create a slow running set of tasks.",
 ) as dag:
+
     def sleepy():
         sleep(5)
+
     sleep_task_1 = PythonOperator(task_id="sleep_task_1", python_callable=sleepy)
     sleep_task_2 = PythonOperator(task_id="sleep_task_2", python_callable=sleepy)
     sleep_task_3 = PythonOperator(task_id="sleep_task_3", python_callable=sleepy)
@@ -531,325 +534,484 @@ with DAG(
     sleep_task_498 = PythonOperator(task_id="sleep_task_498", python_callable=sleepy)
     sleep_task_499 = PythonOperator(task_id="sleep_task_499", python_callable=sleepy)
     sleep_task_500 = PythonOperator(task_id="sleep_task_500", python_callable=sleepy)
-    
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
+
     def _downstream_task(**context):
         print("Help!")
 
@@ -2356,322 +2518,481 @@ with DAG(
 
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
+
     def _another_downstream_task(**context):
         print("Help!")
 

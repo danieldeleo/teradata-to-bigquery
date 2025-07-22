@@ -7,6 +7,7 @@ from airflow.decorators import dag, task, task_group
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from kubernetes.client import models as k8s
 
+
 @dag(
     schedule_interval=None,
     start_date=airflow.utils.dates.days_ago(1),
@@ -19,7 +20,7 @@ from kubernetes.client import models as k8s
 def sleepy():
     @task
     def get_sleepy_minutes():
-        return [1,2,3,4,5]
+        return [1, 2, 3, 4, 5]
 
     @task_group
     def sleep_for(minutes):
@@ -60,7 +61,9 @@ def sleepy():
             # Increase pod startup timeout to 10 minutes
             startup_timeout_seconds=600,
         )
+
     sleep_for.expand(minutes=get_sleepy_minutes())
+
 
 # Instantiate the DAG
 sleepy()

@@ -2,16 +2,16 @@
 from __future__ import annotations
 
 import pendulum
-
 from airflow.models.dag import DAG
 from airflow.operators.empty import EmptyOperator
-from airflow.providers.google.cloud.sensors.gcs import GCSObjectExistenceSensor
 from airflow.providers.google.cloud.operators.gcs import GCSDeleteObjectsOperator
-
+from airflow.providers.google.cloud.sensors.gcs import GCSObjectExistenceSensor
 
 # Define the GCS bucket and object (file) to check for
 GCS_BUCKET = "dannybq"  # <--- CHANGE THIS to your bucket name
-GCS_OBJECT = "airflowsensortest/trigger.txt" # <--- CHANGE THIS to the object path you expect
+GCS_OBJECT = (
+    "airflowsensortest/trigger.txt"  # <--- CHANGE THIS to the object path you expect
+)
 
 # Define default arguments for the DAG
 default_args = {
@@ -21,16 +21,20 @@ default_args = {
 }
 
 # Define the DAG
-with DAG(
-    dag_id="gcs_object_existence_sensor_test",
-    start_date=pendulum.datetime(2025, 4, 21, tz="America/New_York"), # Adjust start date as needed
-    schedule="*/1 14 * * *", # Can be set to a schedule string like "@daily" or None for manual runs
-    catchup=False,
-    max_active_runs=1,
-    default_args=default_args,
-    tags=["gcs", "sensor", "deferrable", "example"],
-    description="Example DAG using GCSObjectExistenceSensor in deferrable mode.",
-) as dag:
+with (
+    DAG(
+        dag_id="gcs_object_existence_sensor_test",
+        start_date=pendulum.datetime(
+            2025, 4, 21, tz="America/New_York"
+        ),  # Adjust start date as needed
+        schedule="*/1 14 * * *",  # Can be set to a schedule string like "@daily" or None for manual runs
+        catchup=False,
+        max_active_runs=1,
+        default_args=default_args,
+        tags=["gcs", "sensor", "deferrable", "example"],
+        description="Example DAG using GCSObjectExistenceSensor in deferrable mode.",
+    ) as dag
+):
     # Task 1: Start task (optional, good practice)
     start = EmptyOperator(task_id="start")
 

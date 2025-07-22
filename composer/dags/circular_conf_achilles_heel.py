@@ -1,8 +1,7 @@
 from airflow.models.dag import DAG
-from airflow.utils.dates import days_ago
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python_operator import PythonOperator
-
+from airflow.utils.dates import days_ago
 
 with DAG(
     dag_id="circular_conf_achilles_heel",
@@ -13,7 +12,6 @@ with DAG(
     default_args={"retries": 0},
     description="Example of a DAG which can cause Airflow Scheduler to endlessly restart itself, rendering Composer inoperable.",
 ) as dag:
-
     start = EmptyOperator(task_id="start")
 
     def _create_circular_conf(**context):

@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-
-from airflow.models.dag import DAG
-from airflow.operators.empty import EmptyOperator
-from airflow.decorators import task, task_group
-from airflow.providers.google.cloud.sensors.cloud_composer import CloudComposerDAGRunSensor
-from airflow.utils.dates import days_ago
 from time import sleep
 
+from airflow.decorators import task, task_group
+from airflow.models.dag import DAG
+from airflow.operators.empty import EmptyOperator
+from airflow.providers.google.cloud.sensors.cloud_composer import (
+    CloudComposerDAGRunSensor,
+)
+from airflow.utils.dates import days_ago
 
 # --- CONFIGURATION ---
 # TODO: Replace with your GCP Project ID, Composer Environment Region, and Composer Environment Name
@@ -29,11 +30,12 @@ with DAG(
     default_args={"retries": 0},
     description="A DAG that demonstrates the use of CloudComposerDagSensor.",
 ) as dag:
+
     @task
     def get_num_sleepy_tasks():
         seconds_of_sleep = 5
         return [seconds_of_sleep] * 1500
-    
+
     @task_group
     def sleepy_task_group(seconds_of_sleep):
         # sensor = CloudComposerDAGRunSensor(
@@ -49,16 +51,18 @@ with DAG(
         def sleepy_task_1(seconds_of_sleep):
             sleep(seconds_of_sleep)
             return seconds_of_sleep
+
         @task
         def sleepy_task_2(seconds_of_sleep):
             sleep(seconds_of_sleep)
             return seconds_of_sleep
+
         @task
         def sleepy_task_3(seconds_of_sleep):
             sleep(seconds_of_sleep)
             return seconds_of_sleep
-        
+
         sleepy_task_3(sleepy_task_2(sleepy_task_1(seconds_of_sleep)))
         # sleepy_task_3(sleepy_task_2(sensor >> sleepy_task_1(seconds_of_sleep)))
+
     sleepy_task_group.expand(seconds_of_sleep=get_num_sleepy_tasks())
-    

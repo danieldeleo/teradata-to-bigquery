@@ -1,7 +1,9 @@
 from airflow.decorators import dag
+
 from custom_parallel_task_group_class import CustomParallelTaskGroup
 
 files = ["file1", "file2", "file3", "file4", "file5"]
+
 
 @dag(schedule=None, catchup=False)
 def custom_parallel_task_group_example():

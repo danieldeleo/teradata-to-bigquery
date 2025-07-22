@@ -4,24 +4,23 @@
 from __future__ import annotations
 
 import pendulum
-
 from airflow.models.dag import DAG
-from airflow.utils.dates import days_ago
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
-from airflow.providers.google.cloud.operators.cloud_composer import CloudComposerRunAirflowCLICommandOperator
+from airflow.providers.google.cloud.operators.cloud_composer import (
+    CloudComposerRunAirflowCLICommandOperator,
+)
+from airflow.utils.dates import days_ago
 
-TARGET_DAG_ID="sleepy"
+TARGET_DAG_ID = "sleepy"
 
 # Define the controller DAG
 with DAG(
     dag_id="dag_triggerer",
     start_date=days_ago(1),
-        schedule=None,
-        catchup=False,
-        max_active_runs=1,
-        default_args={
-            "retries": 0
-        }
+    schedule=None,
+    catchup=False,
+    max_active_runs=1,
+    default_args={"retries": 0},
 ) as dag:
     # Task to trigger the target DAG
     # The `trigger_dag_id` must match the `dag_id` of the DAG you want to run.
@@ -41,5 +40,5 @@ with DAG(
         command=f"dags trigger {TARGET_DAG_ID} --run-id {{{{ ts_nodash }}}}",
         gcp_conn_id="google_cloud_default",
         # You can run this operator in the deferrable mode:
-        deferrable=True
+        deferrable=True,
     )
