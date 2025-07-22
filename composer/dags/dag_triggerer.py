@@ -10,6 +10,8 @@ from airflow.utils.dates import days_ago
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.providers.google.cloud.operators.cloud_composer import CloudComposerRunAirflowCLICommandOperator
 
+TARGET_DAG_ID="sleepy"
+
 # Define the controller DAG
 with DAG(
     dag_id="dag_triggerer",
@@ -35,7 +37,8 @@ with DAG(
         project_id="danny-bq",
         environment_id="small",
         region="us-central1",
-        command="dags trigger -- sleepy",
+        # command="dags trigger -- sleepy",
+        command=f"dags trigger {TARGET_DAG_ID} --run-id {{{{ ts_nodash }}}}",
         # You can run this operator in the deferrable mode:
         # deferrable=True
     )
