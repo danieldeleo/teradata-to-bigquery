@@ -42,6 +42,7 @@ with DAG(
             region=COMPOSER_REGION,
             environment_id=COMPOSER_ENVIRONMENT_NAME,
             composer_dag_id=TARGET_DAG_ID,
+            poll_interval=60,
             # deferrable=True,
         )
         @task
