@@ -39,6 +39,7 @@ with DAG(
         region="us-central1",
         # command="dags trigger -- sleepy",
         command=f"dags trigger {TARGET_DAG_ID} --run-id {{{{ ts_nodash }}}}",
+        gcp_conn_id="google_cloud_default",
         # You can run this operator in the deferrable mode:
         deferrable=True
     )
