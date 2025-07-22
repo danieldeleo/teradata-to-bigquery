@@ -8,6 +8,6 @@ def custom_sleepy_task_group_example():
     @task
     def get_sleepy_seconds():
         return [5,5,5,5,5]
-    CustomSleepyTaskGroup(group_id="my_custom_sleepy_task_group").expand(seconds=get_sleepy_seconds())
+    CustomSleepyTaskGroup.expand(group_id="my_custom_sleepy_task_group", seconds=get_sleepy_seconds())
 
 custom_sleepy_task_group_example()
