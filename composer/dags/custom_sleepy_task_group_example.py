@@ -24,6 +24,11 @@ def custom_sleepy_task_group_example():
 
     @task
     def done_sleeping(seconds):
+        # The seconds variable is not a normal list, but a “lazy sequence” that
+        # retrieves each individual value only when asked since this
+        # task is mapped via dynamic task mapping. Therefore we "ask"
+        # for the values by forcing the lazy sequence into a list using
+        # the list constructor.
         seconds = list(seconds)
         print(f"Done sleeping for {seconds=}")
 
