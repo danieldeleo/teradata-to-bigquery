@@ -23,7 +23,7 @@ def custom_sleepy_task_group_example():
             group_id="my_custom_sleepy_task_group_3",
             seconds=sleep2
         )
-        return sleep3
+        return sleep3.output
 
     @task
     def done_sleeping(seconds):
