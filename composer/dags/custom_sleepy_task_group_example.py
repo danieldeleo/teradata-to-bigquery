@@ -1,8 +1,6 @@
 from airflow.decorators import dag, task, task_group
 from custom_sleepy_task_group_class import CustomSleepyTaskGroup
 
-files = ["file1", "file2", "file3", "file4", "file5"]
-
 @dag(schedule=None, catchup=False)
 def custom_sleepy_task_group_example():
     @task
@@ -11,9 +9,9 @@ def custom_sleepy_task_group_example():
     
     @task_group
     def sleepy_task_group(seconds):
-        sleep1 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group_sleep_for_{seconds}_sec", seconds=seconds)
-        sleep2 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group_sleep_for_{seconds}_sec", seconds=sleep1)
-        sleep3 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group_sleep_for_{seconds}_sec", seconds=sleep2)
+        sleep1 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group", seconds=seconds)
+        sleep2 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group", seconds=sleep1)
+        sleep3 = CustomSleepyTaskGroup(group_id=f"my_custom_sleepy_task_group", seconds=sleep2)
         return sleep3
     
     @task
