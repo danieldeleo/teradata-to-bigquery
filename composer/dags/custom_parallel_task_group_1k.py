@@ -1015,4 +1015,4 @@ def custom_parallel_task_group_1k():
     ctg1000 = CustomParallelTaskGroup(group_id="my_custom_task_group_1000", files=files)
 
 
-custom_parallel_task_group_example()
+custom_parallel_task_group_1k()
