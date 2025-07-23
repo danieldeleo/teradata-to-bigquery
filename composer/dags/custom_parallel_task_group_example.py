@@ -13,10 +13,10 @@ files = [
 
 @dag(schedule=None, catchup=False)
 def custom_parallel_task_group_example():
-    ctg = CustomParallelTaskGroup(group_id="my_custom_task_group", files=files)
+    ctg1 = CustomParallelTaskGroup(group_id="my_custom_task_group_1", files=files)
     ctg2 = CustomParallelTaskGroup(group_id="my_custom_task_group_2", files=files)
     ctg3 = CustomParallelTaskGroup(group_id="my_custom_task_group_3", files=files)
-    ctg >> ctg2 >> ctg3
+    ctg1 >> ctg2 >> ctg3
 
 
 custom_parallel_task_group_example()
