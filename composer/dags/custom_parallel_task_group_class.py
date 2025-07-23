@@ -12,7 +12,7 @@ class CustomParallelTaskGroup(TaskGroup):
         def parallel_task_group(file):
             @task(map_index_template="task1_{{ file }}")
             def task_1(file):
-                context = get_current_context
+                context = get_current_context()
                 context["file"] = file
                 print(f"{file=}")
                 return file
@@ -29,14 +29,14 @@ class CustomParallelTaskGroup(TaskGroup):
         def another_parallel_task_group(file):
             @task(map_index_template="another_task1_{{ file }}")
             def task_1(file, ti):
-                context = get_current_context
+                context = get_current_context()
                 context["file"] = file
                 print(f"{file=}")
                 return file
 
             @task(map_index_template="another_task2_{{ file }}")
             def task_2(file):
-                context = get_current_context
+                context = get_current_context()
                 context["file"] = file
                 print(f"{file=}")
                 return file
