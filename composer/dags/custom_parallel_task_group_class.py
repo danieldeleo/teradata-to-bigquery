@@ -1,5 +1,6 @@
 from airflow import models
 from airflow.decorators import task, task_group
+from airflow.sdk import get_current_context
 from airflow.utils.task_group import TaskGroup
 
 
@@ -9,8 +10,10 @@ class CustomParallelTaskGroup(TaskGroup):
 
         @task_group(parent_group=self)
         def parallel_task_group(file):
-            @task(map_index_template="task1_{{ task.file }}")
+            @task(map_index_template="task1_{{ file }}")
             def task_1(file):
+                context = get_current_context
+                context["file"] = file
                 print(f"{file=}")
                 return file
 
@@ -24,13 +27,17 @@ class CustomParallelTaskGroup(TaskGroup):
 
         @task_group(parent_group=self)
         def another_parallel_task_group(file):
-            @task(map_index_template="another_task1_{{ task.file }}")
+            @task(map_index_template="another_task1_{{ file }}")
             def task_1(file, ti):
+                context = get_current_context
+                context["file"] = file
                 print(f"{file=}")
                 return file
 
-            @task(map_index_template="another_task2_{{ task.file }}")
+            @task(map_index_template="another_task2_{{ file }}")
             def task_2(file):
+                context = get_current_context
+                context["file"] = file
                 print(f"{file=}")
                 return file
 
