@@ -7,7 +7,7 @@ from custom_sleepy_task_group_class import CustomSleepyTaskGroup
 def custom_sleepy_task_group_example():
     @task
     def get_sleepy_seconds():
-        return [5, 4, 3, 2, 1]
+        return [1] * 1000
 
     @task_group
     def sleepy_task_group(seconds):
