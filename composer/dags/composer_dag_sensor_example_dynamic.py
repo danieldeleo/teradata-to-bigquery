@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from time import sleep
 
 from airflow.decorators import task, task_group
@@ -9,6 +10,7 @@ from airflow.providers.google.cloud.sensors.cloud_composer import (
     CloudComposerDAGRunSensor,
 )
 from airflow.utils.dates import days_ago
+from dateutil import parser
 
 # --- CONFIGURATION ---
 # TODO: Replace with your GCP Project ID, Composer Environment Region, and Composer Environment Name
@@ -20,6 +22,35 @@ COMPOSER_ENVIRONMENT_NAME = "small"
 # This example waits for the `gcs_object_existence_sensor_test` DAG.
 TARGET_DAG_ID = "dag_triggerer"
 # --- END CONFIGURATION ---
+
+
+class CustomComposerDAGRunSensor(CloudComposerDAGRunSensor):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _check_dag_runs_states(
+        self,
+        dag_runs: list[dict],
+        start_date: datetime,
+        end_date: datetime,
+    ) -> bool:
+        if len(dag_runs) == 0:
+            return False
+        for dag_run in dag_runs:
+            if (
+                start_date.timestamp()
+                < parser.parse(
+                    dag_run[
+                        "execution_date"
+                        if self._composer_airflow_version < 3
+                        else "logical_date"
+                    ]
+                ).timestamp()
+                < end_date.timestamp()
+            ) and dag_run["state"] not in self.allowed_states:
+                return False
+        return True
+
 
 with DAG(
     dag_id="composer_dag_sensor_example_dynamic",
@@ -34,19 +65,20 @@ with DAG(
     @task
     def get_num_sleepy_tasks():
         seconds_of_sleep = 5
-        return [seconds_of_sleep] * 1500
+        return [seconds_of_sleep] * 10
 
     @task_group
     def sleepy_task_group(seconds_of_sleep):
-        # sensor = CloudComposerDAGRunSensor(
-        #     task_id="wait_for_another_dag",
-        #     project_id=GCP_PROJECT_ID,
-        #     region=COMPOSER_REGION,
-        #     environment_id=COMPOSER_ENVIRONMENT_NAME,
-        #     composer_dag_id=TARGET_DAG_ID,
-        #     poll_interval=60,
-        #     # deferrable=True,
-        # )
+        sensor = CustomComposerDAGRunSensor(
+            task_id="wait_for_another_dag",
+            project_id=GCP_PROJECT_ID,
+            region=COMPOSER_REGION,
+            environment_id=COMPOSER_ENVIRONMENT_NAME,
+            composer_dag_id=TARGET_DAG_ID,
+            poll_interval=60,
+            deferrable=True,
+        )
+
         @task
         def sleepy_task_1(seconds_of_sleep):
             sleep(seconds_of_sleep)
@@ -62,7 +94,7 @@ with DAG(
             sleep(seconds_of_sleep)
             return seconds_of_sleep
 
-        sleepy_task_3(sleepy_task_2(sleepy_task_1(seconds_of_sleep)))
-        # sleepy_task_3(sleepy_task_2(sensor >> sleepy_task_1(seconds_of_sleep)))
+        # sleepy_task_3(sleepy_task_2(sleepy_task_1(seconds_of_sleep)))
+        sleepy_task_3(sleepy_task_2(sensor >> sleepy_task_1(seconds_of_sleep)))
 
     sleepy_task_group.expand(seconds_of_sleep=get_num_sleepy_tasks())
