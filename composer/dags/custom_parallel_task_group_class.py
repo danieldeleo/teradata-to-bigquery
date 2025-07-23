@@ -1,6 +1,6 @@
 from airflow import models
 from airflow.decorators import task, task_group
-from airflow.sdk import get_current_context
+from airflow.operators.python import get_current_context
 from airflow.utils.task_group import TaskGroup
 
 
