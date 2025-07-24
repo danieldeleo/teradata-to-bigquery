@@ -98,7 +98,7 @@ class CustomComposerDAGRunSensor(CloudComposerDAGRunSensor):
                 ),
                 method_name=GOOGLE_DEFAULT_DEFERRABLE_METHOD_NAME,
             )
-        super().execute(context)
+        super().super().execute(context)
 
 
 with DAG(
