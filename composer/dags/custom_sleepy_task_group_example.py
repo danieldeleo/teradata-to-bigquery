@@ -34,7 +34,7 @@ class CustomSleepyTaskGroup(TaskGroup):
 def custom_sleepy_task_group_example():
     @task
     def get_sleepy_seconds():
-        return [1] * 1000
+        return [300] * 1000
 
     @task_group
     def sleepy_task_group(seconds):
