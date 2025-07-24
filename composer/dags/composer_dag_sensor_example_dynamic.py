@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 from typing import TYPE_CHECKING
 
@@ -63,9 +63,26 @@ class CustomComposerDAGRunSensor(CloudComposerDAGRunSensor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def _get_logical_dates(self, context) -> tuple[datetime, datetime]:
+        if isinstance(self.execution_range, timedelta):
+            if self.execution_range < timedelta(0):
+                return context["logical_date"], context[
+                    "logical_date"
+                ] - self.execution_range
+            else:
+                return context["logical_date"] - self.execution_range, context[
+                    "logical_date"
+                ]
+        elif isinstance(self.execution_range, list) and len(self.execution_range) > 0:
+            return self.execution_range[0], self.execution_range[1] if len(
+                self.execution_range
+            ) > 1 else context["logical_date"]
+        else:
+            return context["logical_date"] - timedelta(1), context["logical_date"]
+
     def execute(self, context: Context) -> None:
         if self.deferrable:
-            start_date, end_date = super()._get_logical_dates(context)
+            start_date, end_date = self._get_logical_dates(context)
             self.defer(
                 trigger=CustomCloudComposerDAGRunTrigger(
                     project_id=self.project_id,
