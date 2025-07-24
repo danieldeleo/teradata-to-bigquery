@@ -34,6 +34,8 @@ TARGET_DAG_ID = "dag_triggerer"
 
 
 class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
+    """This trigger will wait for the DAG run completion even if there's no DAG run."""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
