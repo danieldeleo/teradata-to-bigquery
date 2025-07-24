@@ -67,7 +67,7 @@ class CustomComposerDAGRunSensor(CloudComposerDAGRunSensor):
         if self.deferrable:
             start_date, end_date = self._get_logical_dates(context)
             self.defer(
-                trigger=CloudComposerDAGRunTrigger(
+                trigger=CustomCloudComposerDAGRunTrigger(
                     project_id=self.project_id,
                     region=self.region,
                     environment_id=self.environment_id,
