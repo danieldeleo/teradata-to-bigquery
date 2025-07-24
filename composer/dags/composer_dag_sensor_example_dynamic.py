@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from time import sleep
+from typing import TYPE_CHECKING
 
 from airflow.decorators import task, task_group
 from airflow.models.dag import DAG
@@ -9,8 +10,16 @@ from airflow.operators.empty import EmptyOperator
 from airflow.providers.google.cloud.sensors.cloud_composer import (
     CloudComposerDAGRunSensor,
 )
+from airflow.providers.google.cloud.triggers.cloud_composer import (
+    CloudComposerDAGRunTrigger,
+)
 from airflow.utils.dates import days_ago
 from dateutil import parser
+
+if TYPE_CHECKING:
+    from airflow.utils.context import Context
+
+from airflow.providers.google.common.consts import GOOGLE_DEFAULT_DEFERRABLE_METHOD_NAME
 
 # --- CONFIGURATION ---
 # TODO: Replace with your GCP Project ID, Composer Environment Region, and Composer Environment Name
@@ -24,7 +33,7 @@ TARGET_DAG_ID = "dag_triggerer"
 # --- END CONFIGURATION ---
 
 
-class CustomComposerDAGRunSensor(CloudComposerDAGRunSensor):
+class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -41,17 +50,36 @@ class CustomComposerDAGRunSensor(CloudComposerDAGRunSensor):
         for dag_run in dag_runs:
             if (
                 start_date.timestamp()
-                < parser.parse(
-                    dag_run[
-                        "execution_date"
-                        if self._composer_airflow_version < 3
-                        else "logical_date"
-                    ]
-                ).timestamp()
+                < parser.parse(dag_run["logical_date"]).timestamp()
                 < end_date.timestamp()
             ) and dag_run["state"] not in self.allowed_states:
                 return False
         return True
+
+
+class CustomComposerDAGRunSensor(CloudComposerDAGRunSensor):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def execute(self, context: Context) -> None:
+        if self.deferrable:
+            start_date, end_date = self._get_logical_dates(context)
+            self.defer(
+                trigger=CloudComposerDAGRunTrigger(
+                    project_id=self.project_id,
+                    region=self.region,
+                    environment_id=self.environment_id,
+                    composer_dag_id=self.composer_dag_id,
+                    start_date=start_date,
+                    end_date=end_date,
+                    allowed_states=self.allowed_states,
+                    gcp_conn_id=self.gcp_conn_id,
+                    impersonation_chain=self.impersonation_chain,
+                    poll_interval=self.poll_interval,
+                ),
+                method_name=GOOGLE_DEFAULT_DEFERRABLE_METHOD_NAME,
+            )
+        super().execute(context)
 
 
 with DAG(
