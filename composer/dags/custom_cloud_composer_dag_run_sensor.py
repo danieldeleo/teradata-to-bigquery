@@ -19,6 +19,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import Iterable, Sequence
 from datetime import datetime, timedelta
@@ -32,6 +33,7 @@ from airflow.providers.google.cloud.triggers.cloud_composer import (
 )
 from airflow.providers.google.common.consts import GOOGLE_DEFAULT_DEFERRABLE_METHOD_NAME
 from airflow.sensors.base import BaseSensorOperator
+from airflow.triggers.base import TriggerEvent
 from airflow.utils.state import TaskInstanceState
 from dateutil import parser
 from google.cloud.orchestration.airflow.service_v1.types import (
@@ -66,6 +68,36 @@ class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
             ) and dag_run["state"] not in self.allowed_states:
                 return False
         return True
+
+    async def run(self):
+        try:
+            while True:
+                if (
+                    datetime.now(self.end_date.tzinfo).timestamp()
+                    > self.end_date.timestamp()
+                ):
+                    dag_runs = await self._pull_dag_runs()
+
+                    self.log.info(
+                        "Sensor waits for allowed states: %s", self.allowed_states
+                    )
+                    if self._check_dag_runs_states(
+                        dag_runs=dag_runs,
+                        start_date=self.start_date,
+                        end_date=self.end_date,
+                    ):
+                        yield TriggerEvent({"status": "success"})
+                        return
+                self.log.info("Sleeping for %s seconds.", self.poll_interval)
+                await asyncio.sleep(self.poll_interval)
+        except AirflowException as ex:
+            yield TriggerEvent(
+                {
+                    "status": "error",
+                    "message": str(ex),
+                }
+            )
+            return
 
 
 class CustomCloudComposerDAGRunSensor(BaseSensorOperator):
