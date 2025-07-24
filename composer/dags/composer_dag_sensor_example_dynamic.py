@@ -1,24 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 from time import sleep
-from typing import TYPE_CHECKING
 
 from airflow.decorators import task, task_group
 from airflow.models.dag import DAG
-from airflow.providers.google.cloud.sensors.cloud_composer import (
-    CloudComposerDAGRunSensor,
-)
-from airflow.providers.google.cloud.triggers.cloud_composer import (
-    CloudComposerDAGRunTrigger,
-)
-from airflow.sensors.base import BaseSensorOperator
 from airflow.utils.dates import days_ago
-from dateutil import parser
-
-if TYPE_CHECKING:
-    from airflow.utils.context import Context
-from airflow.providers.google.common.consts import GOOGLE_DEFAULT_DEFERRABLE_METHOD_NAME
 
 from custom_cloud_composer_dag_run_sensor import CustomCloudComposerDAGRunSensor
 

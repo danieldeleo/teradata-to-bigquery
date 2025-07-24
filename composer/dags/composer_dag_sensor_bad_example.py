@@ -5,9 +5,6 @@ from time import sleep
 from airflow.models.dag import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python_operator import PythonOperator
-from airflow.providers.google.cloud.sensors.cloud_composer import (
-    CloudComposerDAGRunSensor,
-)
 from airflow.utils.dates import days_ago
 
 # --- CONFIGURATION ---

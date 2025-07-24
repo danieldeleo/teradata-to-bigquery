@@ -34,7 +34,7 @@ class CustomSequentialTaskGroup(TaskGroup):
                         return models.TaskInstance.get_task_instance(
                             ti.dag_id,
                             ti.run_id,
-                            f"my_custom_task_group.sequential_task_group.task_2",
+                            "my_custom_task_group.sequential_task_group.task_2",
                             ti.map_index - 1,
                         )
 

@@ -3,9 +3,7 @@
 
 from __future__ import annotations
 
-import pendulum
 from airflow.models.dag import DAG
-from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.providers.google.cloud.operators.cloud_composer import (
     CloudComposerRunAirflowCLICommandOperator,
 )
