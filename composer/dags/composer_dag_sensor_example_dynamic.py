@@ -6,20 +6,21 @@ from typing import TYPE_CHECKING
 
 from airflow.decorators import task, task_group
 from airflow.models.dag import DAG
-from airflow.operators.empty import EmptyOperator
 from airflow.providers.google.cloud.sensors.cloud_composer import (
     CloudComposerDAGRunSensor,
 )
 from airflow.providers.google.cloud.triggers.cloud_composer import (
     CloudComposerDAGRunTrigger,
 )
+from airflow.sensors.base import BaseSensorOperator
 from airflow.utils.dates import days_ago
 from dateutil import parser
 
 if TYPE_CHECKING:
     from airflow.utils.context import Context
-
 from airflow.providers.google.common.consts import GOOGLE_DEFAULT_DEFERRABLE_METHOD_NAME
+
+from custom_cloud_composer_dag_run_sensor import CustomCloudComposerDAGRunSensor
 
 # --- CONFIGURATION ---
 # TODO: Replace with your GCP Project ID, Composer Environment Region, and Composer Environment Name
@@ -31,74 +32,6 @@ COMPOSER_ENVIRONMENT_NAME = "small"
 # This example waits for the `gcs_object_existence_sensor_test` DAG.
 TARGET_DAG_ID = "dag_triggerer"
 # --- END CONFIGURATION ---
-
-
-class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
-    """This trigger will wait for the DAG run completion even if there's no DAG run."""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def _check_dag_runs_states(
-        self,
-        dag_runs: list[dict],
-        start_date: datetime,
-        end_date: datetime,
-    ) -> bool:
-        print(f"{dag_runs=}")
-        if len(dag_runs) == 0:
-            print("No dag runs found")
-            return False
-        for dag_run in dag_runs:
-            if (
-                start_date.timestamp()
-                < parser.parse(dag_run["logical_date"]).timestamp()
-                < end_date.timestamp()
-            ) and dag_run["state"] not in self.allowed_states:
-                return False
-        return True
-
-
-class CustomComposerDAGRunSensor(CloudComposerDAGRunSensor):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def _get_logical_dates(self, context) -> tuple[datetime, datetime]:
-        if isinstance(self.execution_range, timedelta):
-            if self.execution_range < timedelta(0):
-                return context["logical_date"], context[
-                    "logical_date"
-                ] - self.execution_range
-            else:
-                return context["logical_date"] - self.execution_range, context[
-                    "logical_date"
-                ]
-        elif isinstance(self.execution_range, list) and len(self.execution_range) > 0:
-            return self.execution_range[0], self.execution_range[1] if len(
-                self.execution_range
-            ) > 1 else context["logical_date"]
-        else:
-            return context["logical_date"] - timedelta(1), context["logical_date"]
-
-    def execute(self, context: Context) -> None:
-        if self.deferrable:
-            start_date, end_date = self._get_logical_dates(context)
-            self.defer(
-                trigger=CustomCloudComposerDAGRunTrigger(
-                    project_id=self.project_id,
-                    region=self.region,
-                    environment_id=self.environment_id,
-                    composer_dag_id=self.composer_dag_id,
-                    start_date=start_date,
-                    end_date=end_date,
-                    allowed_states=self.allowed_states,
-                    gcp_conn_id=self.gcp_conn_id,
-                    impersonation_chain=self.impersonation_chain,
-                    poll_interval=self.poll_interval,
-                ),
-                method_name=GOOGLE_DEFAULT_DEFERRABLE_METHOD_NAME,
-            )
-        super().super().execute(context)
 
 
 with DAG(
@@ -118,7 +51,7 @@ with DAG(
 
     @task_group
     def sleepy_task_group(seconds_of_sleep):
-        sensor = CustomComposerDAGRunSensor(
+        sensor = CustomCloudComposerDAGRunSensor(
             task_id="wait_for_another_dag",
             project_id=GCP_PROJECT_ID,
             region=COMPOSER_REGION,
