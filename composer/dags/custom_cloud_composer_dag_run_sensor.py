@@ -56,9 +56,9 @@ class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
         start_date: datetime,
         end_date: datetime,
     ) -> bool:
-        print(f"{dag_runs=}")
+        self.log.info(f"{dag_runs=}")
         if len(dag_runs) == 0:
-            print("No dag runs found")
+            self.log.info("No dag runs found")
             return False
         for dag_run in dag_runs:
             if (
