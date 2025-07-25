@@ -49,6 +49,7 @@ class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        super().run = self.run
 
     def _check_dag_runs_states(
         self,
