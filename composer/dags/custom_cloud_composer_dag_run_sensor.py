@@ -246,6 +246,7 @@ class CustomCloudComposerDAGRunSensor(BaseSensorOperator):
     def execute(self, context: Context) -> None:
         if self.deferrable:
             start_date, end_date = self._get_logical_dates(context)
+            self.log.info("About to defer execution")
             self.defer(
                 trigger=CustomCloudComposerDAGRunTrigger(
                     project_id=self.project_id,
