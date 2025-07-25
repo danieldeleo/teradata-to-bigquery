@@ -71,6 +71,7 @@ class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
 
     async def run(self):
         try:
+            yield TriggerEvent({"status": "error"})
             while True:
                 if (
                     datetime.now(self.end_date.tzinfo).timestamp()
