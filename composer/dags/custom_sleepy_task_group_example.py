@@ -33,8 +33,12 @@ class CustomSleepyTaskGroup(TaskGroup):
 @dag(schedule=None, catchup=False)
 def custom_sleepy_task_group_example():
     @task
-    def get_sleepy_seconds():
-        return [300] * 1000
+    def get_sleepy_seconds(dag_run=None):
+        """Gets the seconds_to_sleep value from the DAG run configuration."""
+        seconds_to_sleep = 300
+        if dag_run and dag_run.conf:
+            seconds_to_sleep = dag_run.conf.get("seconds_to_sleep", 300)
+        return [seconds_to_sleep] * 1000
 
     @task_group
     def sleepy_task_group(seconds):
