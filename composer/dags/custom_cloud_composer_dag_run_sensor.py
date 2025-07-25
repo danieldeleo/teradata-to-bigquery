@@ -88,7 +88,7 @@ class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
                     ):
                         yield TriggerEvent({"status": "success"})
                         return
-                self.log.info("Sleeping for %s seconds.", self.poll_interval)
+                self.log.info("Passing out for %s seconds.", self.poll_interval)
                 await asyncio.sleep(self.poll_interval)
         except AirflowException as ex:
             yield TriggerEvent(
