@@ -1,7 +1,4 @@
-from copy import deepcopy
-
 from airflow.decorators import dag, task, task_group
-from airflow.models.param import Param
 from airflow.utils.task_group import TaskGroup
 
 
@@ -33,23 +30,11 @@ class CustomSleepyTaskGroup(TaskGroup):
         self.output = even_more_sleep_for(more_sleep_for(sleep_for(seconds)))
 
 
-@dag(
-    schedule=None,
-    catchup=False,
-    params={
-        "seconds_to_sleep": Param(
-            300,
-            type="integer",
-            title="Seconds to Sleep",
-            description="The number of seconds each task will sleep.",
-        )
-    },
-)
+@dag(schedule=None, catchup=False)
 def custom_sleepy_task_group_example():
     @task
-    def get_sleepy_seconds(params=None):
-        """Gets the seconds_to_sleep value from the DAG run parameters."""
-        seconds_to_sleep = deepcopy(params["seconds_to_sleep"])
+    def get_sleepy_seconds():
+        seconds_to_sleep = 300
         return [seconds_to_sleep] * 1000
 
     @task_group
