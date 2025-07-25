@@ -111,6 +111,7 @@ class CustomCloudComposerDAGRunTrigger(BaseTrigger):
             execution_cmd_info=ExecuteAirflowCommandResponse.to_dict(dag_runs_cmd),
         )
         dag_runs = json.loads(cmd_result["output"][0]["content"])
+        self.log.info("dag_runs: %s", dag_runs)
         return dag_runs
 
     def _check_dag_runs_states(
@@ -119,6 +120,7 @@ class CustomCloudComposerDAGRunTrigger(BaseTrigger):
         start_date: datetime,
         end_date: datetime,
     ) -> bool:
+        self.log.info("dag_runs: %s", dag_runs)
         if len(dag_runs) == 0:
             return False
         for dag_run in dag_runs:
