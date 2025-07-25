@@ -23,17 +23,17 @@ import asyncio
 import json
 from collections.abc import Iterable, Sequence
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from airflow.configuration import conf
 from airflow.exceptions import AirflowException
-from airflow.providers.google.cloud.hooks.cloud_composer import CloudComposerHook
-from airflow.providers.google.cloud.triggers.cloud_composer import (
-    CloudComposerDAGRunTrigger,
+from airflow.providers.google.cloud.hooks.cloud_composer import (
+    CloudComposerAsyncHook,
+    CloudComposerHook,
 )
 from airflow.providers.google.common.consts import GOOGLE_DEFAULT_DEFERRABLE_METHOD_NAME
 from airflow.sensors.base import BaseSensorOperator
-from airflow.triggers.base import TriggerEvent
+from airflow.triggers.base import BaseTrigger, TriggerEvent
 from airflow.utils.state import TaskInstanceState
 from dateutil import parser
 from google.cloud.orchestration.airflow.service_v1.types import (
@@ -44,12 +44,74 @@ if TYPE_CHECKING:
     from airflow.utils.context import Context
 
 
-class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
-    """This trigger will wait for the DAG run completion even if there's no DAG run."""
+class CustomCloudComposerDAGRunTrigger(BaseTrigger):
+    """The trigger wait for the DAG run completion."""
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        super().run = self.run
+    def __init__(
+        self,
+        project_id: str,
+        region: str,
+        environment_id: str,
+        composer_dag_id: str,
+        start_date: datetime,
+        end_date: datetime,
+        allowed_states: list[str],
+        gcp_conn_id: str = "google_cloud_default",
+        impersonation_chain: str | Sequence[str] | None = None,
+        poll_interval: int = 10,
+    ):
+        super().__init__()
+        self.project_id = project_id
+        self.region = region
+        self.environment_id = environment_id
+        self.composer_dag_id = composer_dag_id
+        self.start_date = start_date
+        self.end_date = end_date
+        self.allowed_states = allowed_states
+        self.gcp_conn_id = gcp_conn_id
+        self.impersonation_chain = impersonation_chain
+        self.poll_interval = poll_interval
+
+        self.gcp_hook = CloudComposerAsyncHook(
+            gcp_conn_id=self.gcp_conn_id,
+            impersonation_chain=self.impersonation_chain,
+        )
+
+    def serialize(self) -> tuple[str, dict[str, Any]]:
+        return (
+            "airflow.providers.google.cloud.triggers.cloud_composer.CloudComposerDAGRunTrigger",
+            {
+                "project_id": self.project_id,
+                "region": self.region,
+                "environment_id": self.environment_id,
+                "composer_dag_id": self.composer_dag_id,
+                "start_date": self.start_date,
+                "end_date": self.end_date,
+                "allowed_states": self.allowed_states,
+                "gcp_conn_id": self.gcp_conn_id,
+                "impersonation_chain": self.impersonation_chain,
+                "poll_interval": self.poll_interval,
+            },
+        )
+
+    async def _pull_dag_runs(self) -> list[dict]:
+        """Pull the list of dag runs."""
+        dag_runs_cmd = await self.gcp_hook.execute_airflow_command(
+            project_id=self.project_id,
+            region=self.region,
+            environment_id=self.environment_id,
+            command="dags",
+            subcommand="list-runs",
+            parameters=["-d", self.composer_dag_id, "-o", "json"],
+        )
+        cmd_result = await self.gcp_hook.wait_command_execution_result(
+            project_id=self.project_id,
+            region=self.region,
+            environment_id=self.environment_id,
+            execution_cmd_info=ExecuteAirflowCommandResponse.to_dict(dag_runs_cmd),
+        )
+        dag_runs = json.loads(cmd_result["output"][0]["content"])
+        return dag_runs
 
     def _check_dag_runs_states(
         self,
@@ -57,9 +119,7 @@ class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
         start_date: datetime,
         end_date: datetime,
     ) -> bool:
-        self.log.info(f"{dag_runs=}")
         if len(dag_runs) == 0:
-            self.log.info("No dag runs found")
             return False
         for dag_run in dag_runs:
             if (
@@ -72,7 +132,6 @@ class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
 
     async def run(self):
         try:
-            yield TriggerEvent({"status": "error"})
             while True:
                 if (
                     datetime.now(self.end_date.tzinfo).timestamp()
@@ -90,7 +149,7 @@ class CustomCloudComposerDAGRunTrigger(CloudComposerDAGRunTrigger):
                     ):
                         yield TriggerEvent({"status": "success"})
                         return
-                self.log.info("Passing out for %s seconds.", self.poll_interval)
+                self.log.info("Sleeping for %s seconds.", self.poll_interval)
                 await asyncio.sleep(self.poll_interval)
         except AirflowException as ex:
             yield TriggerEvent(
