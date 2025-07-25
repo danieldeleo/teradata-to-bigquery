@@ -79,7 +79,7 @@ class CustomCloudComposerDAGRunTrigger(BaseTrigger):
 
     def serialize(self) -> tuple[str, dict[str, Any]]:
         return (
-            "CustomCloudComposerDAGRunTrigger",
+            "custom_cloud_composer_dag_run_sensor.CustomCloudComposerDAGRunTrigger",
             {
                 "project_id": self.project_id,
                 "region": self.region,
