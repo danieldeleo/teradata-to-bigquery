@@ -79,7 +79,7 @@ class CustomCloudComposerDAGRunTrigger(BaseTrigger):
 
     def serialize(self) -> tuple[str, dict[str, Any]]:
         return (
-            "airflow.providers.google.cloud.triggers.cloud_composer.CloudComposerDAGRunTrigger",
+            "CustomCloudComposerDAGRunTrigger",
             {
                 "project_id": self.project_id,
                 "region": self.region,
