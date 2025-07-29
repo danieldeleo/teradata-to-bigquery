@@ -44,7 +44,7 @@ class CustomSleepyTaskGroup(TaskGroup):
             description="The number of seconds each task will sleep.",
         )
     },
-    max_active_tasks=200,
+    max_active_tasks=500,
 )
 def custom_sleepy_task_group_example():
     @task
