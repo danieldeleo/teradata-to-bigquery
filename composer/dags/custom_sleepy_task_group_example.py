@@ -44,6 +44,7 @@ class CustomSleepyTaskGroup(TaskGroup):
             description="The number of seconds each task will sleep.",
         )
     },
+    max_active_tasks=200,
 )
 def custom_sleepy_task_group_example():
     @task
@@ -52,7 +53,7 @@ def custom_sleepy_task_group_example():
         seconds_to_sleep = deepcopy(params["seconds_to_sleep"])
         return [seconds_to_sleep] * 1000
 
-    @task_group
+    @task_group()
     def sleepy_task_group(seconds):
         sleep1 = CustomSleepyTaskGroup(
             group_id="my_custom_sleepy_task_group_1", seconds=seconds
