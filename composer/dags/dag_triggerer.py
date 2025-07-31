@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime
 
 from airflow.models.dag import DAG
 from airflow.providers.google.cloud.operators.cloud_composer import (
@@ -55,7 +55,7 @@ with DAG(
         region=COMPOSER_REGION,
         environment_id=COMPOSER_ENVIRONMENT_NAME,
         composer_dag_id=TARGET_DAG_ID,
-        execution_range=timedelta(days=-1),
+        execution_range=[datetime.now() - datetime.timedelta(hours=1), datetime.now()],
         deferrable=True,
     )
     run_airflow_cli_cmd >> sensor
