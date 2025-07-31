@@ -3,8 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-
+import pendulum
 from airflow.models.dag import DAG
 from airflow.providers.google.cloud.operators.cloud_composer import (
     CloudComposerRunAirflowCLICommandOperator,
@@ -56,8 +55,10 @@ with DAG(
         environment_id=COMPOSER_ENVIRONMENT_NAME,
         composer_dag_id=TARGET_DAG_ID,
         execution_range=[
-            datetime.now().replace(hour=0, minute=0, second=0, microsecond=0),
-            datetime.now(),
+            pendulum.now("America/New_York").replace(
+                hour=0, minute=0, second=0, microsecond=0
+            ),
+            pendulum.now("America/New_York"),
         ],
         # deferrable=True,
     )
