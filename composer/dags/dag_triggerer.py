@@ -55,6 +55,6 @@ with DAG(
             pendulum.now("America/New_York").start_of("day"),
             pendulum.now("America/New_York"),
         ],
-        # deferrable=True,
+        deferrable=True,
     )
     sensor
