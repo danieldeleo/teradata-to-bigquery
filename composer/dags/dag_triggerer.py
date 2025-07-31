@@ -5,9 +5,6 @@ from __future__ import annotations
 
 import pendulum
 from airflow.models.dag import DAG
-from airflow.providers.google.cloud.operators.cloud_composer import (
-    CloudComposerRunAirflowCLICommandOperator,
-)
 from airflow.providers.google.cloud.sensors.cloud_composer import (
     CloudComposerDAGRunSensor,
 )
@@ -37,17 +34,17 @@ with DAG(
     #     # You can pass configuration to the triggered DAG like this:
     #     conf={"steps":[{"name":"middle", "type":"middle", "params":{"steps":{}}}]},
     # )
-    run_airflow_cli_cmd = CloudComposerRunAirflowCLICommandOperator(
-        task_id="run_airflow_cli_cmd",
-        project_id="danny-bq",
-        environment_id="small",
-        region="us-central1",
-        # command="dags trigger -- sleepy",
-        command=f"dags trigger {TARGET_DAG_ID} --run-id {{{{ ts_nodash }}}}",
-        gcp_conn_id="google_cloud_default",
-        # You can run this operator in the deferrable mode:
-        deferrable=True,
-    )
+    # run_airflow_cli_cmd = CloudComposerRunAirflowCLICommandOperator(
+    #     task_id="run_airflow_cli_cmd",
+    #     project_id="danny-bq",
+    #     environment_id="small",
+    #     region="us-central1",
+    #     # command="dags trigger -- sleepy",
+    #     command=f"dags trigger {TARGET_DAG_ID} --run-id {{{{ ts_nodash }}}}",
+    #     gcp_conn_id="google_cloud_default",
+    #     # You can run this operator in the deferrable mode:
+    #     deferrable=True,
+    # )
     sensor = CloudComposerDAGRunSensor(
         task_id="wait_for_another_dag",
         project_id=GCP_PROJECT_ID,
@@ -62,4 +59,4 @@ with DAG(
         ],
         # deferrable=True,
     )
-    run_airflow_cli_cmd >> sensor
+    sensor
