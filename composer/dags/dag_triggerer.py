@@ -13,7 +13,7 @@ from airflow.providers.google.cloud.sensors.cloud_composer import (
 )
 from airflow.utils.dates import days_ago
 
-TARGET_DAG_ID = "sleepy"
+TARGET_DAG_ID = "custom_sleepy_task_group_example"
 # --- CONFIGURATION ---
 # TODO: Replace with your GCP Project ID, Composer Environment Region, and Composer Environment Name
 GCP_PROJECT_ID = "danny-bq"
