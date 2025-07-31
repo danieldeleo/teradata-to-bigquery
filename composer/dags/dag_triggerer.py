@@ -55,7 +55,10 @@ with DAG(
         region=COMPOSER_REGION,
         environment_id=COMPOSER_ENVIRONMENT_NAME,
         composer_dag_id=TARGET_DAG_ID,
-        execution_range=[datetime.now() - datetime.timedelta(hours=1), datetime.now()],
+        execution_range=[
+            datetime.now().replace(hour=0, minute=0, second=0, microsecond=0),
+            datetime.now(),
+        ],
         deferrable=True,
     )
     run_airflow_cli_cmd >> sensor
