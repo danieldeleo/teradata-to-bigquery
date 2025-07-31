@@ -3,14 +3,23 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from airflow.models.dag import DAG
 from airflow.providers.google.cloud.operators.cloud_composer import (
     CloudComposerRunAirflowCLICommandOperator,
 )
+from airflow.providers.google.cloud.sensors.cloud_composer import (
+    CloudComposerDAGRunSensor,
+)
 from airflow.utils.dates import days_ago
 
 TARGET_DAG_ID = "sleepy"
-
+# --- CONFIGURATION ---
+# TODO: Replace with your GCP Project ID, Composer Environment Region, and Composer Environment Name
+GCP_PROJECT_ID = "danny-bq"
+COMPOSER_REGION = "us-central1"  # e.g., us-central1
+COMPOSER_ENVIRONMENT_NAME = "small"
 # Define the controller DAG
 with DAG(
     dag_id="dag_triggerer",
@@ -40,3 +49,14 @@ with DAG(
         # You can run this operator in the deferrable mode:
         deferrable=True,
     )
+    sensor = CloudComposerDAGRunSensor(
+        task_id="wait_for_another_dag",
+        project_id=GCP_PROJECT_ID,
+        region=COMPOSER_REGION,
+        environment_id=COMPOSER_ENVIRONMENT_NAME,
+        composer_dag_id=TARGET_DAG_ID,
+        poll_interval=60,
+        execution_range=datetime.timedelta(days=-1),
+        deferrable=True,
+    )
+    run_airflow_cli_cmd >> sensor

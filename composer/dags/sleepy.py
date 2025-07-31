@@ -20,7 +20,7 @@ from kubernetes.client import models as k8s
 def sleepy():
     @task
     def get_sleepy_minutes():
-        return [1, 2, 3, 4, 5]
+        return [1, 1, 1, 1, 1]
 
     @task_group
     def sleep_for(minutes):
