@@ -59,6 +59,6 @@ with DAG(
             datetime.now().replace(hour=0, minute=0, second=0, microsecond=0),
             datetime.now(),
         ],
-        deferrable=True,
+        # deferrable=True,
     )
     run_airflow_cli_cmd >> sensor
