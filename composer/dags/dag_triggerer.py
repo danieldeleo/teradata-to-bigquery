@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+import datetime
 
 from airflow.models.dag import DAG
 from airflow.providers.google.cloud.operators.cloud_composer import (
@@ -55,7 +55,6 @@ with DAG(
         region=COMPOSER_REGION,
         environment_id=COMPOSER_ENVIRONMENT_NAME,
         composer_dag_id=TARGET_DAG_ID,
-        poll_interval=60,
         execution_range=datetime.timedelta(days=-1),
         deferrable=True,
     )
