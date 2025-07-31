@@ -3,9 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from zoneinfo import ZoneInfo
-
+import pendulum
 from airflow.models.dag import DAG
 from airflow.providers.google.cloud.sensors.cloud_composer import (
     CloudComposerDAGRunSensor,
@@ -54,10 +52,8 @@ with DAG(
         environment_id=COMPOSER_ENVIRONMENT_NAME,
         composer_dag_id=TARGET_DAG_ID,
         execution_range=[
-            datetime.now(ZoneInfo("America/New_York")).replace(
-                hour=0, minute=0, second=0, microsecond=0
-            ),
-            datetime.now(ZoneInfo("America/New_York")),
+            pendulum.now("America/New_York").start_of("day"),
+            pendulum.now("America/New_York"),
         ],
         # deferrable=True,
     )
