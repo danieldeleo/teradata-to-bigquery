@@ -21,14 +21,11 @@ steps:
     script: |
       #!/usr/bin/env bash
       set -eo pipefail  # Enable exit-on-error mode
-      # Get the DAGs folder URI for all Composer environments in the specified location and copy DAGs to them.
-      gcloud composer environments list --locations=us-east4 --format="get(storageConfig.bucket)" | while read -r bucket; do
-        if [[ -n "$bucket" ]]; then
-          gcloud storage cp composer/dags/*.py gs://${bucket}/dags
-        fi
-      done
-      gcloud composer environments list --locations=us-central1 --format="get(storageConfig.bucket)" | while read -r bucket; do
-        if [[ -n "$bucket" ]]; then
-          gcloud storage cp composer/dags/*.py gs://${bucket}/dags
-        fi
+      for location in us-east4 us-central1; do
+        # Get the DAGs folder URI for all Composer environments in the specified location and copy DAGs to them.
+        gcloud composer environments list --locations=$location --format="get(storageConfig.bucket)" | while read -r bucket; do
+          if [[ -n "$bucket" ]]; then
+            gcloud storage cp composer/dags/*.py gs://${bucket}/dags
+          fi
+        done
       done
