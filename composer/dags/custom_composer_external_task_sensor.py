@@ -148,8 +148,8 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
             # 3. Find DAG run
             dag_run_url = f"{airflow_uri}/api/v1/dags/{self.external_dag_id}/dagRuns"
             params = {
-                "execution_date_gte": execution_date.isoformat(),
-                "execution_date_lte": execution_date.isoformat(),
+                "execution_date_gte": execution_date.start_of("day").isoformat(),
+                "execution_date_lte": execution_date.end_of("day").isoformat(),
             }
             print(f"{dag_run_url=}")
             print(f"{params=}")
