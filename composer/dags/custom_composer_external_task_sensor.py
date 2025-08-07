@@ -157,7 +157,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
             )
             response.raise_for_status()
             dag_runs = response.json()["dag_runs"]
-
+            print(f"{dag_runs=}")
             if not dag_runs:
                 self.log.info(
                     "No DAG run found for execution date %s. Poking again.",
