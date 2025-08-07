@@ -33,7 +33,7 @@ with DAG(
         external_dag_id=TARGET_DAG_ID,
         external_task_id=TARGET_TASK_ID,
         # deferrable=True,
-        poke_interval=30,
+        poke_interval=5,
     )
 
     all_done = EmptyOperator(task_id="all_done")
