@@ -32,6 +32,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
     :param environment_id: The name of the external Composer environment.
     :param external_dag_id: The dag_id that contains the task.
     :param external_task_id: The task_id to wait for.
+    :param external_task_map_index: The map_index of the task to wait for, if applicable.
     :param allowed_states: Iterable of allowed states, default is ``['success']``.
     :param failed_states: Iterable of failed or dis-allowed states, default is
         ``['failed', 'skipped']``.
@@ -49,6 +50,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
         "environment_id",
         "external_dag_id",
         "external_task_id",
+        "external_task_map_index",
         "impersonation_chain",
     )
 
@@ -60,6 +62,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
         environment_id: str,
         external_dag_id: str,
         external_task_id: str,
+        external_task_map_index: int | None = None,
         allowed_states: Iterable[str] | None = None,
         failed_states: Iterable[str] | None = None,
         execution_date_fn: Callable[[DateTime], DateTime] | None = None,
@@ -76,6 +79,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
         self.environment_id = environment_id
         self.external_dag_id = external_dag_id
         self.external_task_id = external_task_id
+        self.external_task_map_index = external_task_map_index
         self.allowed_states = (
             list(allowed_states) if allowed_states else [TaskInstanceState.SUCCESS]
         )
@@ -99,13 +103,12 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
 
     def poke(self, context: Context) -> bool:
         execution_date = self._get_target_execution_date(context)
-        self.log.info(
-            "Poking for task '%s' in DAG '%s' in project '%s' at execution date %s ...",
-            self.external_task_id,
-            self.external_dag_id,
-            self.project_id,
-            execution_date,
+        log_message = (
+            f"Poking for task '{self.external_task_id}'"
+            f"{f' with map_index {self.external_task_map_index}' if self.external_task_map_index is not None else ''}"
+            f" in DAG '{self.external_dag_id}' in project '{self.project_id}' at execution date {execution_date} ..."
         )
+        self.log.info(log_message)
 
         hook = CloudComposerHook(
             gcp_conn_id=self.gcp_conn_id,
@@ -174,36 +177,46 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
                 return "failed", f"External DAG run for {self.external_dag_id} failed."
 
             # 4. Get Task Instance status
-            task_instance_url = f"{airflow_uri}/api/v1/dags/{self.external_dag_id}/dagRuns/{dag_run_id}/taskInstances/{self.external_task_id}/0"
+            task_instance_url = f"{airflow_uri}/api/v1/dags/{self.external_dag_id}/dagRuns/{dag_run_id}/taskInstances/{self.external_task_id}"
+            if self.external_task_map_index is not None:
+                task_instance_url += f"/{self.external_task_map_index}"
 
             response = authed_session.get(task_instance_url, timeout=self.poke_interval)
 
             if response.status_code == 404:
-                self.log.info(
-                    "Task instance '%s' not found yet for DAG run '%s'. Poking again.",
-                    self.external_task_id,
-                    dag_run_id,
+                log_message = (
+                    f"Task instance '{self.external_task_id}'"
+                    f"{f' with map_index {self.external_task_map_index}' if self.external_task_map_index is not None else ''}"
+                    f" not found yet for DAG run '{dag_run_id}'. Poking again."
                 )
+                self.log.info(log_message)
                 return "pending", "Task instance not found yet."
 
             response.raise_for_status()
             task_instance = response.json()
             task_state = task_instance.get("state")
 
-            self.log.info(
-                "Found task '%s' with state '%s'", self.external_task_id, task_state
+            log_message = (
+                f"Found task '{self.external_task_id}'"
+                f"{f' with map_index {self.external_task_map_index}' if self.external_task_map_index is not None else ''}"
+                f" with state '{task_state}'"
             )
+            self.log.info(log_message)
 
             if task_state in self.failed_states:
                 return (
                     "failed",
-                    f"External task {self.external_task_id} in DAG {self.external_dag_id} failed with state: {task_state}",
+                    f"External task {self.external_task_id} in DAG {self.external_dag_id} "
+                    f"{f'with map_index {self.external_task_map_index} ' if self.external_task_map_index is not None else ''}"
+                    f"failed with state: {task_state}",
                 )
 
             if task_state in self.allowed_states:
                 return (
                     "success",
-                    f"External task {self.external_task_id} in DAG {self.external_dag_id} is in state: {task_state}",
+                    f"External task {self.external_task_id} in DAG {self.external_dag_id} "
+                    f"{f'with map_index {self.external_task_map_index} ' if self.external_task_map_index is not None else ''}"
+                    f"is in state: {task_state}",
                 )
 
             return "running", f"Task is in state {task_state}."
