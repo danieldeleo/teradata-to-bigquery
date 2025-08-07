@@ -32,6 +32,8 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
     :param environment_id: The name of the external Composer environment.
     :param external_dag_id: The dag_id that contains the task.
     :param external_task_id: The task_id to wait for.
+    :param external_dag_run_id: The dag_run_id to wait for. If provided,
+        ``execution_date_fn`` is ignored.
     :param external_task_map_index: The map_index of the task to wait for, if applicable.
     :param allowed_states: Iterable of allowed states, default is ``['success']``.
     :param failed_states: Iterable of failed or dis-allowed states, default is
@@ -49,6 +51,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
         "region",
         "environment_id",
         "external_dag_id",
+        "external_dag_run_id",
         "external_task_id",
         "external_task_map_index",
         "impersonation_chain",
@@ -61,6 +64,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
         region: str,
         environment_id: str,
         external_dag_id: str,
+        external_dag_run_id: str | None = None,
         external_task_id: str,
         external_task_map_index: int | None = None,
         allowed_states: Iterable[str] | None = None,
@@ -78,6 +82,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
         self.region = region
         self.environment_id = environment_id
         self.external_dag_id = external_dag_id
+        self.external_dag_run_id = external_dag_run_id
         self.external_task_id = external_task_id
         self.external_task_map_index = external_task_map_index
         self.allowed_states = (
@@ -96,26 +101,23 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
         self.impersonation_chain = impersonation_chain
         self.deferrable = deferrable
 
+        if self.external_dag_run_id and self.execution_date_fn:
+            raise AirflowException(
+                "Only one of `external_dag_run_id` or `execution_date_fn` can be provided."
+            )
+
     def _get_target_execution_date(self, context: Context) -> DateTime:
         if self.execution_date_fn:
             return self.execution_date_fn(context["logical_date"])
         return context["logical_date"]
 
     def poke(self, context: Context) -> bool:
-        execution_date = self._get_target_execution_date(context)
-        log_message = (
-            f"Poking for task '{self.external_task_id}'"
-            f"{f' with map_index {self.external_task_map_index}' if self.external_task_map_index is not None else ''}"
-            f" in DAG '{self.external_dag_id}' in project '{self.project_id}' at execution date {execution_date} ..."
-        )
-        self.log.info(log_message)
-
         hook = CloudComposerHook(
             gcp_conn_id=self.gcp_conn_id,
             impersonation_chain=self.impersonation_chain,
         )
 
-        status, message = self._check_task_status(hook, execution_date)
+        status, message = self._check_task_status(hook, context)
 
         if status == "success":
             return True
@@ -127,7 +129,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
         return False
 
     def _check_task_status(
-        self, hook: CloudComposerHook, execution_date: DateTime
+        self, hook: CloudComposerHook, context: Context
     ) -> tuple[str, str]:
         """
         Checks the status of the external task using an access token.
@@ -148,28 +150,54 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
             credentials = hook.get_credentials()
             authed_session = AuthorizedSession(credentials)
 
+            dag_run_id = None
             # 3. Find DAG run
-            dag_run_url = f"{airflow_uri}/api/v1/dags/{self.external_dag_id}/dagRuns"
-            params = {
-                "execution_date_gte": execution_date.start_of("day").isoformat(),
-                "execution_date_lte": execution_date.end_of("day").isoformat(),
-            }
-            print(f"{dag_run_url=}")
-            print(f"{params=}")
-            response = authed_session.get(
-                dag_run_url, params=params, timeout=self.poke_interval
-            )
-            response.raise_for_status()
-            dag_runs = response.json()["dag_runs"]
-            print(f"{response.json()}")
-            if not dag_runs:
+            if self.external_dag_run_id:
+                dag_run_id = self.external_dag_run_id
                 self.log.info(
-                    "No DAG run found for execution date %s. Poking again.",
+                    "Poking for task '%s' in DAG run '%s' in project '%s'...",
+                    self.external_task_id,
+                    dag_run_id,
+                    self.project_id,
+                )
+                dag_run_url = f"{airflow_uri}/api/v1/dags/{self.external_dag_id}/dagRuns/{dag_run_id}"
+                response = authed_session.get(dag_run_url, timeout=self.poke_interval)
+                if response.status_code == 404:
+                    self.log.info(
+                        "DAG run '%s' not found yet. Poking again.", dag_run_id
+                    )
+                    return "pending", "DAG run not found yet."
+                response.raise_for_status()
+                dag_run = response.json()
+            else:
+                execution_date = self._get_target_execution_date(context)
+                self.log.info(
+                    "Poking for task '%s' in DAG '%s' in project '%s' at execution date %s ...",
+                    self.external_task_id,
+                    self.external_dag_id,
+                    self.project_id,
                     execution_date,
                 )
-                return "pending", "No DAG run found yet."
+                dag_run_url = (
+                    f"{airflow_uri}/api/v1/dags/{self.external_dag_id}/dagRuns"
+                )
+                params = {
+                    "execution_date_gte": execution_date.isoformat(),
+                    "execution_date_lte": execution_date.isoformat(),
+                }
+                response = authed_session.get(
+                    dag_run_url, params=params, timeout=self.poke_interval
+                )
+                response.raise_for_status()
+                dag_runs = response.json()["dag_runs"]
+                if not dag_runs:
+                    self.log.info(
+                        "No DAG run found for execution date %s. Poking again.",
+                        execution_date,
+                    )
+                    return "pending", "No DAG run found yet."
+                dag_run = dag_runs[-1]  # Get the latest one
 
-            dag_run = dag_runs[-1]  # Get the latest one
             dag_run_id = dag_run["dag_run_id"]
             dag_run_state = dag_run["state"]
 
