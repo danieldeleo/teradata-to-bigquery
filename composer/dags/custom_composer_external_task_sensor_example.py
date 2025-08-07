@@ -32,7 +32,7 @@ with DAG(
         environment_id=COMPOSER_ENVIRONMENT_NAME,
         external_dag_id=TARGET_DAG_ID,
         external_task_id=TARGET_TASK_ID,
-        deferrable=True,
+        # deferrable=True,
         poke_interval=30,
     )
 
