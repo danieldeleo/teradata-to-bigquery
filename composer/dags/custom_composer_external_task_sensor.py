@@ -174,7 +174,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
                 return "failed", f"External DAG run for {self.external_dag_id} failed."
 
             # 4. Get Task Instance status
-            task_instance_url = f"{airflow_uri}/api/v1/dags/{self.external_dag_id}/dagRuns/{dag_run_id}/taskInstances/{self.external_task_id}"
+            task_instance_url = f"{airflow_uri}/api/v1/dags/{self.external_dag_id}/dagRuns/{dag_run_id}/taskInstances/{self.external_task_id}/0"
 
             response = authed_session.get(task_instance_url, timeout=self.poke_interval)
 
