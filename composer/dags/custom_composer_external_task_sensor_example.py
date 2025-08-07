@@ -3,7 +3,6 @@ from __future__ import annotations
 import pendulum
 from airflow.models.dag import DAG
 from airflow.operators.empty import EmptyOperator
-
 from custom_composer_external_task_sensor import CloudComposerExternalTaskSensor
 
 # --- CONFIGURATION ---

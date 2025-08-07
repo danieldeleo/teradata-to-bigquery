@@ -5,7 +5,6 @@ from time import sleep
 from airflow.decorators import task, task_group
 from airflow.models.dag import DAG
 from airflow.utils.dates import days_ago
-
 from custom_cloud_composer_dag_run_sensor import CustomCloudComposerDAGRunSensor
 
 # --- CONFIGURATION ---

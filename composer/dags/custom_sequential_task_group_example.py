@@ -1,5 +1,4 @@
 from airflow.decorators import dag
-
 from custom_sequential_task_group_class import CustomSequentialTaskGroup
 
 

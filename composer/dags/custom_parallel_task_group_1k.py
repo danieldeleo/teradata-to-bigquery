@@ -1,5 +1,4 @@
 from airflow.decorators import dag
-
 from custom_parallel_task_group_class import CustomParallelTaskGroup
 
 files = [
