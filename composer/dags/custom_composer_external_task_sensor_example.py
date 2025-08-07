@@ -31,8 +31,9 @@ with DAG(
         region=COMPOSER_REGION,
         environment_id=COMPOSER_ENVIRONMENT_NAME,
         external_dag_id=TARGET_DAG_ID,
+        external_dag_run_id="manual__2025-08-07T16:02:11+00:00",
         external_task_id=TARGET_TASK_ID,
-        external_task_map_index=0,  # Example of waiting for the first mapped task instance
+        external_task_map_index=7,  # Example of waiting for the first mapped task instance
         # deferrable=True,
         poke_interval=5,
     )
