@@ -139,7 +139,22 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
                 environment_id=self.environment_id,
             )
             airflow_uri = environment.config.airflow_uri
-            client_id = environment.config.web_server_config.client_id
+
+            # Get client_id, supporting both Composer 2 and 3.
+            # Path for Composer 3.
+            client_id = getattr(environment.config.web_server_config, "client_id", None)
+            # Path for Composer 2.
+            if not client_id:
+                try:
+                    client_id = environment.config.web_server_network_access_control.iap_config.oauth2_client_id
+                except AttributeError:
+                    pass  # If this also fails, we'll raise an error below.
+
+            if not client_id:
+                raise AirflowException(
+                    "Could not find IAP client_id for the Composer environment. "
+                    "This might be because IAP is not enabled or due to a permissions issue."
+                )
 
             creds = hook._get_credentials()
             if not creds.valid:
@@ -217,7 +232,7 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
             return "pending", f"HTTP error: {e}"
         except Exception as e:
             self.log.error("Error checking task status: %s", e, exc_info=True)
-            return "pending", f"Error: {e}"
+            raise AirflowException(f"Error checking task status: {e}") from e
 
     def execute(self, context: Context) -> Any:
         if not self.deferrable:
@@ -331,7 +346,21 @@ class CloudComposerExternalTaskTrigger(BaseTrigger):
                 environment_id=self.environment_id,
             )
             airflow_uri = environment.config.airflow_uri
-            client_id = environment.config.web_server_config.client_id
+            # Get client_id, supporting both Composer 2 and 3.
+            # Path for Composer 3.
+            client_id = getattr(environment.config.web_server_config, "client_id", None)
+            # Path for Composer 2.
+            if not client_id:
+                try:
+                    client_id = environment.config.web_server_network_access_control.iap_config.oauth2_client_id
+                except AttributeError:
+                    pass  # If this also fails, we'll raise an error below.
+
+            if not client_id:
+                raise AirflowException(
+                    "Could not find IAP client_id for the Composer environment. "
+                    "This might be because IAP is not enabled or due to a permissions issue."
+                )
 
             async with httpx.AsyncClient() as client:
                 while True:
