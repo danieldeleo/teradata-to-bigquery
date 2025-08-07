@@ -42,7 +42,13 @@ class CustomSleepyTaskGroup(TaskGroup):
             type="integer",
             title="Seconds to Sleep",
             description="The number of seconds each task will sleep.",
-        )
+        ),
+        "number_of_sleepy_tasks": Param(
+            10,
+            type="integer",
+            title="Number of Tasks to Sleep",
+            description="The number of tasks that will sleep.",
+        ),
     },
     # max_active_tasks=500,
 )
@@ -51,7 +57,8 @@ def custom_sleepy_task_group_example():
     def get_sleepy_seconds(params=None):
         """Gets the seconds_to_sleep value from the DAG run parameters."""
         seconds_to_sleep = deepcopy(params["seconds_to_sleep"])
-        return [seconds_to_sleep] * 1000
+        num_sleepy_tasks = deepcopy(params["number_of_sleepy_tasks"])
+        return [seconds_to_sleep] * num_sleepy_tasks
 
     @task_group()
     def sleepy_task_group(seconds):

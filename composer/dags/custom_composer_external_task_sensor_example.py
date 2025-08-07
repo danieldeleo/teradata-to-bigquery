@@ -8,13 +8,13 @@ from custom_composer_external_task_sensor import CloudComposerExternalTaskSensor
 
 # --- CONFIGURATION ---
 # TODO: Replace with your GCP Project ID, Composer Environment Region, and Composer Environment Name
-GCP_PROJECT_ID = "your-gcp-project-id"
-COMPOSER_REGION = "us-central1"
-COMPOSER_ENVIRONMENT_NAME = "your-composer-environment-name"
+GCP_PROJECT_ID = "danny-bq"
+COMPOSER_REGION = "us-east4"
+COMPOSER_ENVIRONMENT_NAME = "east"
 
 # The dag_id and task_id of the DAG you want to wait for.
-TARGET_DAG_ID = "gcs_object_existence_sensor_test"
-TARGET_TASK_ID = "delete_trigger_file"
+TARGET_DAG_ID = "custom_sleepy_task_group_example"
+TARGET_TASK_ID = "sleepy_task_group.my_custom_sleepy_task_group_1.sleep_for"
 # --- END CONFIGURATION ---
 
 with DAG(
