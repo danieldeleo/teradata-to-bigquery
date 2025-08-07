@@ -151,13 +151,14 @@ class CloudComposerExternalTaskSensor(BaseSensorOperator):
                 "execution_date_gte": execution_date.isoformat(),
                 "execution_date_lte": execution_date.isoformat(),
             }
-
+            print(f"{dag_run_url=}")
+            print(f"{params=}")
             response = authed_session.get(
                 dag_run_url, params=params, timeout=self.poke_interval
             )
             response.raise_for_status()
             dag_runs = response.json()["dag_runs"]
-            print(f"{response=}")
+            print(f"{response.json()}")
             if not dag_runs:
                 self.log.info(
                     "No DAG run found for execution date %s. Poking again.",
