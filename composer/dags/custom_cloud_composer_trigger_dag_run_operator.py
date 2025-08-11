@@ -83,7 +83,7 @@ class CloudComposerTriggerDagRunOperator(TriggerDagRunOperator):
                 "or similar sensor to wait for the external DAG run."
             )
 
-    def _do_trigger_dagrun(self, context: Context) -> dict[str, Any]:
+    def execute(self, context: Context) -> dict[str, Any]:
         """
         Overrides the parent method to trigger a DAG run in an external Composer environment.
         """
