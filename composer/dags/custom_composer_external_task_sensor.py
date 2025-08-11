@@ -19,13 +19,9 @@ if TYPE_CHECKING:
 
 class CloudComposerExternalTaskSensor(BaseSensorOperator):
     """
-    Waits for a task to complete in a different Cloud Composer environment.
+    This sensor uses the Airflow REST API to wait for a task to complete
+    in either the same or different Cloud Composer environment.
 
-    .. note::
-        This sensor authenticates using a GCP **access token** via ``AuthorizedSession``.
-        Standard IAP-protected Composer environments require an **ID token**.
-        If your environment uses IAP, this authentication method may not work.
-    It uses the Airflow REST API of the external environment.
 
     :param project_id: The GCP project ID of the external Composer environment.
     :param region: The region of the external Composer environment.
