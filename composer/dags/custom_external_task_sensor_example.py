@@ -51,11 +51,28 @@ with DAG(
         timeout=600,
     )
 
+    # Example of waiting for a task to succeed within a specific date range.
+    # This is useful when you don't know the exact run_id but know it should have run
+    # sometime in the last hour.
+    wait_for_task_in_date_range = CustomExternalTaskSensor(
+        task_id="wait_for_task_in_date_range",
+        external_dag_id=TARGET_DAG_ID,
+        external_task_id=TARGET_TASK_ID,
+        execution_date_start="{{ (data_interval_end - macros.timedelta(hours=1)).isoformat() }}",
+        execution_date_end="{{ data_interval_end.isoformat() }}",
+        poke_interval=10,
+        timeout=600,
+    )
+
     all_done = EmptyOperator(task_id="all_done")
 
     (
         start
         >> trigger_target_dag
-        >> [wait_for_mapped_task_instance, wait_for_entire_mapped_task]
+        >> [
+            wait_for_mapped_task_instance,
+            wait_for_entire_mapped_task,
+            wait_for_task_in_date_range,
+        ]
         >> all_done
     )
