@@ -15,7 +15,7 @@ steps:
         --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.2/constraints-3.11.txt
       airflow standalone &
       airflow db check
-      python3 -m pytest -s tests
+      python3 -m pytest -vv -s tests
   # Copy DAGs to the Composer /dags Cloud Storage folder only if unit tests pass
   - name: gcr.io/cloud-builders/gcloud
     script: |
