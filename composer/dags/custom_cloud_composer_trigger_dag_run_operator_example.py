@@ -20,7 +20,7 @@ TARGET_DAG_ID = "custom_sleepy_task_group_example"
 # --- END CONFIGURATION ---
 
 with DAG(
-    dag_id="cloud_composer_trigger_dag_run_example",
+    dag_id="custom_cloud_composer_trigger_dag_run_operator_example",
     start_date=pendulum.datetime(2025, 4, 21, tz="America/New_York"),
     schedule=None,
     catchup=False,
