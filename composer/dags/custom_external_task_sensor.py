@@ -88,9 +88,9 @@ class CustomExternalTaskSensor(ExternalTaskSensor):
                 raise AirflowException(
                     "`external_task_map_index` is only supported when `external_dag_run_id` is provided."
                 )
-            if self.external_task_ids:
+            if len(self.external_task_ids) > 1:
                 raise AirflowException(
-                    "`external_task_map_index` is not supported with `external_task_ids`."
+                    "`external_task_map_index` is not supported with many `external_task_ids`."
                 )
 
     @provide_session
