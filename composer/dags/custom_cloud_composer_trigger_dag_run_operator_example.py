@@ -34,18 +34,14 @@ with DAG(
 ) as dag:
     start = EmptyOperator(task_id="start")
 
-    # Example 1: Trigger a DAG in the external Composer environment
     trigger_external_dag = CloudComposerTriggerDagRunOperator(
         task_id="trigger_external_composer_dag",
         project_id=EXTERNAL_GCP_PROJECT_ID,
         region=EXTERNAL_COMPOSER_REGION,
         environment_id=EXTERNAL_COMPOSER_ENVIRONMENT_NAME,
         trigger_dag_id=TARGET_DAG_ID,
-        # wait_for_completion=True, # This would raise an AirflowException
         # Pass some configuration to the triggered DAG
         conf={"seconds_to_sleep": 10, "number_of_sleepy_tasks": 2},
-        # Optionally set a specific logical_date for the triggered DAG run
-        # logical_date=pendulum.datetime(2025, 8, 1, tz="UTC"),
     )
     end = EmptyOperator(task_id="end")
 
