@@ -31,6 +31,10 @@ def sleepy_pod():
         env_vars={"AIRFLOW_RETRY_NUMBER": "{{ task_instance.try_number }}"},
         image="gcr.io/google.com/cloudsdktool/cloud-sdk:latest",
         namespace="composer-user-workloads",
+        # Specifies path to kubernetes config. The config_file is templated.
+        config_file="/home/airflow/composer_kube_config",
+        # Identifier of connection that should be used
+        kubernetes_conn_id="kubernetes_default",
     )
 
 
