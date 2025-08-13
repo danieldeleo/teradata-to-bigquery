@@ -5,7 +5,6 @@ import datetime
 import airflow
 from airflow.decorators import dag
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
-from kubernetes.client import models as k8s
 
 
 @dag(
@@ -31,12 +30,7 @@ def sleepy_pod():
         ],
         env_vars={"AIRFLOW_RETRY_NUMBER": "{{ task_instance.try_number }}"},
         image="gcr.io/google.com/cloudsdktool/cloud-sdk:latest",
-        container_resources=k8s.V1ResourceRequirements(
-            requests={
-                "cpu": "100m",
-                "memory": "64Mi",
-            }
-        ),
+        namespace="composer-user-workloads",
     )
 
 
