@@ -38,3 +38,6 @@ def sleepy_pod():
             }
         ),
     )
+
+
+sleepy_pod()
